@@ -10,15 +10,16 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.6.5",
     "next": "^15.3.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "@opennextjs/cloudflare": "1.6.5"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@webflow/webflow-cli": "^1.12.2",
     "typescript": "^5.8.0",
     "wrangler": "^4.23.0"
   }
