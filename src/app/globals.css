@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════════════════
    globals.css — VC Stack poster, single-screen view.
    The poster is 1920×1080 (16:9). We scale it to fit
-   the viewport using CSS scale() so it always shows
-   in full on one screen, on any device.
+   the viewport using CSS scale(). On mobile, users
+   can pinch-to-zoom into the poster.
    ══════════════════════════════════════════════════════ */
 
 /* ── Reset & base ── */
@@ -11,7 +11,6 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: #F8F8EE;
   -webkit-font-smoothing: antialiased;
 }
@@ -38,7 +37,7 @@ html, body {
   box-shadow: 0 6px 36px rgba(0,0,0,0.12);
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   transform-origin: center center;
-  /* JS sets the scale; fallback to fit width */
+  /* JS sets the scale */
   transform: scale(var(--poster-scale, 0.7));
 }
 

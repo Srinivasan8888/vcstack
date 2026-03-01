@@ -159,16 +159,15 @@ export default function Home() {
       renderLandscape(landscapeRef.current);
     }
 
-    // Scale poster to fit viewport
+    // Scale poster to fit viewport — poster is one fixed unit,
+    // just scales down at every size, never reflows.
     function fitPoster() {
       if (!posterRef.current) return;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      // poster is 1920×1080; add small padding
-      const pad = 24;
-      const scaleX = (vw - pad) / 1920;
-      const scaleY = (vh - pad) / 1080;
-      const scale = Math.min(scaleX, scaleY, 1); // never upscale
+      const scaleX = vw / 1920;
+      const scaleY = vh / 1080;
+      const scale = Math.min(scaleX, scaleY, 1); // never upscale past 1:1
       posterRef.current.style.transform = `scale(${scale})`;
     }
 

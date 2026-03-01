@@ -7,6 +7,14 @@ export const metadata: Metadata = {
     "Visual landscape of 147 tools used by VCs and angel investors, curated by Indian VCs",
 };
 
+/* Allow pinch-to-zoom on mobile */
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 export default function RootLayout({
   children,
 }: {
