@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { IndianVCsLogo } from "./logo";
 import { DevLinkProvider } from "../../devlink/DevLinkProvider";
-import { GlobalStyles } from "../../devlink/GlobalStyles";
-import { Nav } from "../../devlink/Nav";
+import { Navbar } from "../../devlink/Navbar";
+import { ContactSection } from "../../devlink/ContactSection";
 import { Footer } from "../../devlink/Footer";
 
 /* ── Tool data ── */
@@ -164,17 +165,30 @@ export default function Home() {
 
   return (
     <DevLinkProvider>
-      <GlobalStyles />
-      <Nav />
-      <main id="main">
-        <section className="landscape-section">
-          <div className="landscape-header">
-            <h1>VC Stack</h1>
-            <p>curated by Indian VCs</p>
-          </div>
+      <Navbar />
+      <div className="page-content">
+        <div className="poster">
+          <header className="header">
+            <div className="hdr-row">
+              <h1>VC Stack</h1>
+              <span className="sep">&middot;</span>
+              <span className="curated">curated by</span>
+              <a
+                href="https://hub.indianvcs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="logo-link"
+                title="Indian VCs"
+              >
+                <IndianVCsLogo />
+              </a>
+            </div>
+          </header>
           <div className="landscape" ref={landscapeRef} />
-        </section>
-      </main>
+          <div className="poster-footer" />
+        </div>
+      </div>
+      <ContactSection />
       <Footer title="Shaping India's venture future" />
     </DevLinkProvider>
   );
