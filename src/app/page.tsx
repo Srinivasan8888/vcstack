@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { IndianVCsLogo } from "./logo";
+import { DevLinkProvider } from "../../devlink/DevLinkProvider";
+import { GlobalStyles } from "../../devlink/GlobalStyles";
+import { Nav } from "../../devlink/Nav";
+import { Footer } from "../../devlink/Footer";
 
 /* ── Tool data ── */
 interface Tool {
@@ -160,25 +163,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="poster">
-      <header className="header">
-        <div className="hdr-row">
-          <h1>VC Stack</h1>
-          <span className="sep">·</span>
-          <span className="curated">curated by</span>
-          <a
-            href="https://hub.indianvcs.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="logo-link"
-            title="Indian VCs"
-          >
-            <IndianVCsLogo />
-          </a>
-        </div>
-      </header>
-      <div className="landscape" ref={landscapeRef} />
-      <div className="footer" />
-    </div>
+    <DevLinkProvider>
+      <GlobalStyles />
+      <Nav />
+      <main id="main">
+        <section className="landscape-section">
+          <div className="landscape-header">
+            <h1>VC Stack</h1>
+            <p>curated by Indian VCs</p>
+          </div>
+          <div className="landscape" ref={landscapeRef} />
+        </section>
+      </main>
+      <Footer title="Shaping India's venture future" />
+    </DevLinkProvider>
   );
 }
