@@ -204,3 +204,8 @@ a[class*="cta"]{
 #w-node-a8557cf2-5af3-99f6-c20b-8b6061942ecb-61942ec0{grid-area:2/3/3/4}
 /* Legals wrap (bottom grid): spans 2 columns */
 #w-node-a8557cf2-5af3-99f6-c20b-8b6061942ed7-61942ec0{grid-area:span 1/span 2/span 1/span 2}
+
+/* ── Footer legal links: right-align to match social icons above ── */
+[class*="legals_link_wrap"]{
+  justify-content:flex-end !important;
+}

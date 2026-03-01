@@ -225,7 +225,7 @@ export function Footer({
             tag="div"
           >
             {"© "}
-            <_Builtin.Span id="copyright-yr">{"2023"}</_Builtin.Span>
+            <_Builtin.Span id="copyright-yr">{"2026"}</_Builtin.Span>
             {" IndianVCs. All rights reserved."}
           </_Builtin.Block>
           <_Builtin.Block
