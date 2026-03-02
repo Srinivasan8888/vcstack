@@ -149,6 +149,8 @@ html, body {
   border-radius: 6px;
   object-fit: contain;
   flex-shrink: 0;
+  /* Subtle bg so white/transparent logos remain visible */
+  background: #f0f0ec;
 }
 .t-fb {
   width: 36px;
