@@ -2,11 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
 
-// In Prisma 7, if the URL is not in the schema, it MUST be passed here or via env
-const prisma = new PrismaClient({
-  // Try the 'datasource' property which is sometimes used in newer versions
-  // or fall back to providing it via the environment variable logic
-});
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting seed...');
@@ -24,7 +20,6 @@ async function main() {
 
   console.log(`Found ${categoriesData.length} categories and ${productsData.length} products.`);
 
-  // 1. Create Categories
   for (const cat of categoriesData) {
     await prisma.category.upsert({
       where: { slug: cat.slug },
@@ -33,7 +28,6 @@ async function main() {
     });
   }
 
-  // 2. Create Products
   for (const prod of productsData) {
     if (!prod.name || !prod.slug) continue;
 
