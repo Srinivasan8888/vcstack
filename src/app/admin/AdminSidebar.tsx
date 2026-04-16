@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { UserButton } from '@clerk/nextjs'
 import {
   LayoutDashboard,
   Wrench,
@@ -9,7 +10,7 @@ import {
   ClipboardList,
   Star,
   Layers,
-  LogOut,
+  ExternalLink,
 } from 'lucide-react'
 
 const NAV = [
@@ -58,14 +59,25 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-1">
         <Link
           href="/"
           className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         >
-          <LogOut className="h-4 w-4" />
+          <ExternalLink className="h-4 w-4" />
           Back to site
         </Link>
+        <div className="flex items-center gap-2.5 rounded-md px-3 py-2">
+          <UserButton
+            afterSignOutUrl="/admin/login"
+            appearance={{
+              elements: {
+                avatarBox: 'h-6 w-6',
+              },
+            }}
+          />
+          <span className="text-sm text-muted-foreground">Account</span>
+        </div>
       </div>
     </aside>
   )

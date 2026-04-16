@@ -1,16 +1,12 @@
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import AdminSidebar from './AdminSidebar'
 
-export const metadata = { title: { template: '%s | Admin – VCStack.io', default: 'Admin' } }
-
-// In production, replace with real session check via NextAuth getServerSession
-async function requireAdmin() {
-  // TODO: wire up getServerSession(authOptions) here
-  return true
-}
+export const metadata = { title: { template: '%s | Admin – VCStack', default: 'Admin' } }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin()
+  const { userId } = await auth()
+  if (!userId) redirect('/admin/login')
 
   return (
     <div className="fixed inset-0 flex bg-[oklch(0.08_0.025_265)] text-foreground overflow-hidden">
