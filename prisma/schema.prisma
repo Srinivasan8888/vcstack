@@ -3,8 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
 }
 
 model User {
@@ -12,16 +11,11 @@ model User {
   email         String       @unique
   passwordHash  String?
   name          String?
-  role          Role         @default(USER)
+  role          String       @default("USER")
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   reviews       Review[]
   submissions   Submission[]
-}
-
-enum Role {
-  USER
-  ADMIN
 }
 
 model Category {
@@ -51,11 +45,13 @@ model Tool {
   id             String         @id @default(cuid())
   name           String         @unique
   slug           String         @unique
-  description    String         @db.Text
+  tagline        String?
+  description    String
   shortDesc      String?
   websiteUrl     String
   logoUrl        String?
-  pricingModel   PricingModel   @default(FREEMIUM)
+  mainImageUrl   String?
+  pricingModel   String         @default("FREEMIUM")
   isFeatured     Boolean        @default(false)
   categoryId     String
   category       Category       @relation(fields: [categoryId], references: [id])
@@ -65,13 +61,6 @@ model Tool {
   reviews        Review[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-}
-
-enum PricingModel {
-  FREE
-  FREEMIUM
-  PAID
-  ENTERPRISE
 }
 
 model Tag {
@@ -84,7 +73,7 @@ model Tag {
 model Review {
   id        String   @id @default(cuid())
   rating    Int      @default(5)
-  content   String   @db.Text
+  content   String
   toolId    String
   tool      Tool     @relation(fields: [toolId], references: [id])
   userId    String
@@ -98,16 +87,11 @@ model Submission {
   id          String   @id @default(cuid())
   toolName    String
   websiteUrl  String
-  description String   @db.Text
+  description String
   submitterId String
   submitter   User     @relation(fields: [submitterId], references: [id])
-  status      SubmissionStatus @default(PENDING)
+  status      String   @default("PENDING")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-enum SubmissionStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
