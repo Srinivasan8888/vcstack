@@ -28,23 +28,17 @@ export default function SearchBox({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`relative mx-auto w-full max-w-2xl ${className}`}
+      className={`relative mx-auto w-full max-w-xl ${className}`}
     >
       <div className="relative flex items-center">
-        <Search className="pointer-events-none absolute left-4 h-4 w-4 text-muted-foreground" />
+        <Search className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" />
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="h-12 w-full rounded-xl border border-border bg-white pl-11 pr-28 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15 transition-all shadow-sm"
+          className="h-13 w-full rounded-full border border-white/80 bg-white/90 backdrop-blur-sm pl-11 pr-5 text-sm text-foreground placeholder:text-gray-400 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200/50 transition-all shadow-md"
         />
-        <button
-          type="submit"
-          className="absolute right-2 h-8 rounded-lg bg-primary px-4 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Search
-        </button>
       </div>
     </form>
   )

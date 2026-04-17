@@ -23,11 +23,9 @@ export default function AdminLoginPage() {
               dividerLine: 'bg-white/10',
               dividerText: 'text-gray-500',
               formFieldLabel: 'text-gray-300',
-              formFieldInput: 'bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/60',
+              formFieldInput: 'bg-white/5 border-white/10 text-white placeholder:text-gray-600',
               formButtonPrimary: 'bg-primary hover:bg-primary/90',
               footerActionLink: 'text-primary hover:text-primary/80',
-              identityPreviewText: 'text-gray-300',
-              identityPreviewEditButton: 'text-primary',
             },
           }}
         />

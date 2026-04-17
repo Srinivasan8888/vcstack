@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { UserButton, Show } from '@clerk/nextjs'
 import {
   LayoutDashboard,
   Wrench,
@@ -14,11 +14,11 @@ import {
 } from 'lucide-react'
 
 const NAV = [
-  { label: 'Dashboard',   href: '/admin/dashboard',    icon: LayoutDashboard },
-  { label: 'Tools',       href: '/admin/tools',        icon: Wrench },
-  { label: 'Categories',  href: '/admin/categories',   icon: FolderOpen },
-  { label: 'Submissions', href: '/admin/submissions',  icon: ClipboardList },
-  { label: 'Reviews',     href: '/admin/reviews',      icon: Star },
+  { label: 'Dashboard',   href: '/admin/dashboard',   icon: LayoutDashboard },
+  { label: 'Tools',       href: '/admin/tools',       icon: Wrench },
+  { label: 'Categories',  href: '/admin/categories',  icon: FolderOpen },
+  { label: 'Submissions', href: '/admin/submissions', icon: ClipboardList },
+  { label: 'Reviews',     href: '/admin/reviews',     icon: Star },
 ]
 
 export default function AdminSidebar() {
@@ -67,16 +67,15 @@ export default function AdminSidebar() {
           <ExternalLink className="h-4 w-4" />
           Back to site
         </Link>
-        <div className="flex items-center gap-2.5 rounded-md px-3 py-2">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'h-6 w-6',
-              },
-            }}
-          />
-          <span className="text-sm text-muted-foreground">Account</span>
-        </div>
+
+        <Show when="signed-in">
+          <div className="flex items-center gap-2.5 rounded-md px-3 py-2">
+            <UserButton
+              appearance={{ elements: { avatarBox: 'h-6 w-6' } }}
+            />
+            <span className="text-sm text-muted-foreground">Account</span>
+          </div>
+        </Show>
       </div>
     </aside>
   )

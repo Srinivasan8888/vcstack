@@ -1,31 +1,14 @@
-import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Star, Monitor, Share2 } from 'lucide-react'
 import PageLayout from '@/components/layout/PageLayout'
 import CategoryCard from '@/components/cards/CategoryCard'
 import SearchBox from '@/components/ui/SearchBox'
+import LogoCard from '@/components/ui/LogoCard'
 import NewsletterForm from '@/components/ui/NewsletterForm'
-import { getCategories, getFeaturedTools } from '@/lib/data'
+import { getCategories, getFeaturedTools, getCategoryPreviewTools } from '@/lib/data'
 import type { Tool } from '@/lib/types'
 
 export const revalidate = 3600
-
-/* ─── Floating logo bubble ───────────────────────────────────────────────── */
-function LogoBubble({
-  initials, color, size = 'md', style,
-}: {
-  initials: string; color: string; size?: 'sm' | 'md' | 'lg'; style?: CSSProperties
-}) {
-  const sz = size === 'lg' ? 'h-14 w-14 text-base' : size === 'sm' ? 'h-9 w-9 text-[10px]' : 'h-12 w-12 text-xs'
-  return (
-    <div
-      className={`absolute ${sz} rounded-full shadow-md flex items-center justify-center font-bold text-white border-2 border-white`}
-      style={{ background: color, ...style }}
-    >
-      {initials}
-    </div>
-  )
-}
 
 /* ─── "Our Favorites" card ───────────────────────────────────────────────── */
 function FavoriteCard({ tool, categoryLabel }: { tool: Tool; categoryLabel: string }) {
@@ -186,9 +169,10 @@ const FAQ = [
 ]
 
 export default async function HomePage() {
-  const [categories, featuredTools] = await Promise.all([
+  const [categories, featuredTools, previewToolsMap] = await Promise.all([
     getCategories(),
     getFeaturedTools(12),
+    getCategoryPreviewTools(),
   ])
 
   const favorites = featuredTools.slice(0, 6)
@@ -197,36 +181,51 @@ export default async function HomePage() {
     <PageLayout>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-96 flex items-center justify-center py-20 px-4">
-        {/* Floating brand logos – left side */}
+      <section
+        className="relative overflow-hidden flex items-center justify-center px-4"
+        style={{
+          minHeight: '540px',
+          paddingTop: '5rem',
+          paddingBottom: '5rem',
+          background: 'linear-gradient(180deg, #f0eef9 0%, #e8e6f3 40%, #dfdcee 100%)',
+        }}
+      >
+        {/* Floating tool logo cards */}
         <div className="pointer-events-none absolute inset-0">
-          <LogoBubble initials="H"  color="#FF6B35" size="md" style={{ top: '18%', left:  '3%' }} />
-          <LogoBubble initials="N"  color="#000000" size="md" style={{ top: '12%', left: '14%' }} />
-          <LogoBubble initials="C"  color="#146EF5" size="sm" style={{ top: '40%', left:  '7%' }} />
-          <LogoBubble initials="CB" color="#0A66C2" size="sm" style={{ top: '28%', left: '20%' }} />
-          <LogoBubble initials="A"  color="#6C5CE7" size="md" style={{ top: '55%', left: '12%' }} />
-          <LogoBubble initials="S"  color="#00B4D8" size="sm" style={{ top: '70%', left:  '5%' }} />
-          <LogoBubble initials="DC" color="#1D3557" size="sm" style={{ top: '65%', left: '22%' }} />
-          <LogoBubble initials="V"  color="#00A878" size="lg" style={{ top: '80%', left: '15%' }} />
-          {/* Right side */}
-          <LogoBubble initials="W"  color="#4353FF" size="md" style={{ top: '12%', right: '14%' }} />
-          <LogoBubble initials="Sf" color="#00A1E0" size="sm" style={{ top: '22%', right:  '4%' }} />
-          <LogoBubble initials="Sl" color="#4A154B" size="md" style={{ top: '38%', right: '20%' }} />
-          <LogoBubble initials="P"  color="#FF6584" size="sm" style={{ top: '52%', right:  '6%' }} />
-          <LogoBubble initials="JS" color="#1B4332" size="sm" style={{ top: '48%', right: '18%' }} />
-          <LogoBubble initials="Ct" color="#0073E6" size="md" style={{ top: '65%', right: '10%' }} />
-          <LogoBubble initials="E"  color="#8338EC" size="sm" style={{ top: '72%', right: '22%' }} />
-          <LogoBubble initials="Tr" color="#FF9500" size="lg" style={{ top: '80%', right:  '5%' }} />
+          {/* Left column */}
+          <LogoCard name="PitchBook"   logoUrl="https://www.google.com/s2/favicons?domain=pitchbook.com&sz=128"   size="md" delay="0.0s" duration="3.8s" style={{ top: '14%', left: '4%' }} />
+          <LogoCard name="Crunchbase"  logoUrl="https://www.google.com/s2/favicons?domain=crunchbase.com&sz=128"  size="sm" delay="1.6s" duration="4.2s" style={{ top: '48%', left: '6%' }} />
+          <LogoCard name="Slack"       logoUrl="https://www.google.com/s2/favicons?domain=slack.com&sz=128"       size="md" delay="2.4s" duration="3.5s" style={{ top: '76%', left: '5%' }} />
+          {/* Left-center */}
+          <LogoCard name="Harmonic"    logoUrl="https://www.google.com/s2/favicons?domain=harmonic.ai&sz=128"     size="sm" delay="0.5s" duration="4.0s" style={{ top: '8%',  left: '17%' }} />
+          <LogoCard name="CB Insights" logoUrl="https://www.google.com/s2/favicons?domain=cbinsights.com&sz=128"  size="md" delay="2.0s" duration="3.6s" style={{ top: '36%', left: '15%' }} />
+          <LogoCard name="Airtable"    logoUrl="https://www.google.com/s2/favicons?domain=airtable.com&sz=128"    size="sm" delay="2.8s" duration="4.4s" style={{ top: '62%', left: '19%' }} />
+          <LogoCard name="Notion"      logoUrl="https://www.google.com/s2/favicons?domain=notion.so&sz=128"       size="md" delay="1.2s" duration="3.9s" style={{ top: '86%', left: '14%' }} />
+          {/* Right-center */}
+          <LogoCard name="Webflow"     logoUrl="https://www.google.com/s2/favicons?domain=webflow.com&sz=128"     size="md" delay="0.7s" duration="3.7s" style={{ top: '8%',  right: '17%' }} />
+          <LogoCard name="Linear"      logoUrl="https://www.google.com/s2/favicons?domain=linear.app&sz=128"      size="sm" delay="2.2s" duration="4.1s" style={{ top: '36%', right: '15%' }} />
+          <LogoCard name="Attio"       logoUrl="https://www.google.com/s2/favicons?domain=attio.com&sz=128"       size="md" delay="1.4s" duration="3.3s" style={{ top: '62%', right: '19%' }} />
+          <LogoCard name="Edda"        logoUrl="https://www.google.com/s2/favicons?domain=edda.co&sz=128"         size="sm" delay="3.0s" duration="4.5s" style={{ top: '86%', right: '14%' }} />
+          {/* Right column */}
+          <LogoCard name="Salesforce"  logoUrl="https://www.google.com/s2/favicons?domain=salesforce.com&sz=128"  size="sm" delay="1.8s" duration="3.6s" style={{ top: '14%', right: '4%' }} />
+          <LogoCard name="Affinity"    logoUrl="https://www.google.com/s2/favicons?domain=affinity.co&sz=128"     size="md" delay="0.3s" duration="4.3s" style={{ top: '48%', right: '6%' }} />
+          <LogoCard name="Visible"     logoUrl="https://www.google.com/s2/favicons?domain=visible.vc&sz=128"      size="sm" delay="2.6s" duration="3.4s" style={{ top: '76%', right: '5%' }} />
         </div>
 
         {/* Central content */}
-        <div className="relative z-10 mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4 leading-tight">
+        <div className="relative z-10 mx-auto text-center" style={{ maxWidth: 540 }}>
+          <h1
+            className="font-extrabold tracking-tight leading-[1.12] mb-5"
+            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', color: '#1a1a2e' }}
+          >
             Find your VC software stack
           </h1>
-          <p className="text-base text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-            The world&apos;s largest directory of tools and resources for venture capital and angel investors
+
+          <p className="text-base leading-relaxed mb-8 mx-auto" style={{ color: '#6b6b8a', maxWidth: 440 }}>
+            The world&apos;s largest directory of tools and resources for
+            venture capital and angel investors
           </p>
+
           <SearchBox placeholder="Search for product or category" />
         </div>
       </section>
@@ -259,7 +258,12 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => (
-            <CategoryCard key={cat.id} category={cat} variant="default" />
+            <CategoryCard
+              key={cat.id}
+              category={cat}
+              variant="default"
+              previewTools={previewToolsMap[cat.slug] ?? []}
+            />
           ))}
         </div>
       </section>

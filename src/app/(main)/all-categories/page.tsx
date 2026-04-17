@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getCategories } from '@/lib/data'
+import { getCategories, getCategoryPreviewTools } from '@/lib/data'
 import CategoryCard from '@/components/cards/CategoryCard'
 
 export const metadata: Metadata = {
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function AllCategoriesPage() {
-  const categories = await getCategories()
+  const [categories, previewToolsMap] = await Promise.all([
+    getCategories(),
+    getCategoryPreviewTools(),
+  ])
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -25,7 +28,11 @@ export default async function AllCategoriesPage() {
       {/* Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((cat) => (
-          <CategoryCard key={cat.id} category={cat} />
+          <CategoryCard
+            key={cat.id}
+            category={cat}
+            previewTools={previewToolsMap[cat.slug] ?? []}
+          />
         ))}
       </div>
     </div>

@@ -5,6 +5,7 @@
  */
 
 import type { Category, Tool, PaginatedResult, SearchFilters } from './types'
+import type { PreviewTool } from '@/components/cards/CategoryCard'
 import { setCategoryResolver, buildAllTools } from './tools-data'
 
 async function getPrisma() {
@@ -80,8 +81,21 @@ export async function getToolsByCategory(
       return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) }
     } catch { /* fall through */ }
   }
-  const filtered = STATIC_TOOLS.filter((t) => t.category?.slug === categorySlug)
-  return { data: filtered, total: filtered.length, page: 1, pageSize: filtered.length, totalPages: 1 }
+  let filtered = STATIC_TOOLS.filter((t) => t.category?.slug === categorySlug)
+  if (pricing) filtered = filtered.filter((t) => t.pricingModel === pricing)
+  if (query) {
+    const q = query.toLowerCase()
+    filtered = filtered.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        (t.shortDesc ?? '').toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q)
+    )
+  }
+  const total = filtered.length
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const data = filtered.slice((page - 1) * pageSize, page * pageSize)
+  return { data, total, page, pageSize, totalPages }
 }
 
 export async function getFeaturedTools(limit = 12): Promise<Tool[]> {
@@ -205,35 +219,44 @@ export async function getSiteStats() {
   }
 }
 
+/** Returns up to 4 preview tools (name + logoUrl) per category slug. */
+export async function getCategoryPreviewTools(): Promise<Record<string, PreviewTool[]>> {
+  const result: Record<string, PreviewTool[]> = {}
+  for (const tool of STATIC_TOOLS) {
+    const slug = tool.category?.slug
+    if (!slug) continue
+    if (!result[slug]) result[slug] = []
+    if (result[slug].length < 4) {
+      result[slug].push({ name: tool.name, logoUrl: tool.logoUrl ?? null })
+    }
+  }
+  return result
+}
+
 // ─── Category images — served locally from public/images/categories/ ──────────
+// Only real landscape photos included; small tool logos use gradient fallback.
 // Downloaded by: python3 download_cat_images.py
 const CAT_IMAGES: Record<string, string> = {
-  'calendar':                            '/images/categories/calendar.jpg',
+  // ✅ Verified real photos (>30 KB)
   'captable-equity-management':          '/images/categories/captable-equity-management.jpg',
   'community':                           '/images/categories/community.jpg',
   'crm':                                 '/images/categories/crm.jpg',
   'data':                                '/images/categories/data.jpg',
   'data-room':                           '/images/categories/data-room.jpg',
-  'deal-sourcing':                       '/images/categories/deal-sourcing.jpg',
-  'email':                               '/images/categories/email.jpg',
-  'esg':                                 '/images/categories/esg.jpg',
   'fund-admin-software':                 '/images/categories/fund-admin-software.jpg',
-  'fund-modeling-portfolio-forecasting': '/images/categories/fund-modeling-portfolio-forecasting.jpg',
-  'hiring-payroll':                      '/images/categories/hiring-payroll.jpg',
   'infrastructure':                      '/images/categories/infrastructure.jpg',
-  'insurance':                           '/images/categories/insurance.jpg',
-  'job-board-talent-pool':               '/images/categories/job-board-talent-pool.jpg',
-  'liquidity-instruments':               '/images/categories/liquidity-instruments.jpg',
+  'platform':                            '/images/categories/platform.jpg',
+  // ✅ Smaller but verified photos
+  'calendar':                            '/images/categories/calendar.jpg',
+  'esg':                                 '/images/categories/esg.jpg',
   'lp-tools':                            '/images/categories/lp-tools.jpg',
   'newsletter-tools':                    '/images/categories/newsletter-tools.jpg',
-  'news-resources':                      '/images/categories/news-resources.jpg',
-  'other-tools':                         '/images/categories/other-tools.jpg',
-  'platform':                            '/images/categories/platform.jpg',
-  'portfolio-management':                '/images/categories/portfolio-management.jpg',
-  'project-management':                  '/images/categories/project-management.jpg',
   'research':                            '/images/categories/research.jpg',
-  'video-conferencing':                  '/images/categories/video-conferencing.jpg',
-  'website':                             '/images/categories/website.jpg',
+  // ❌ Removed — these downloaded as tool logos, gradient looks better:
+  // deal-sourcing, portfolio-management (both = Edda logo, 18K)
+  // email, fund-modeling, hiring-payroll, insurance, job-board,
+  // liquidity-instruments, news-resources, other-tools,
+  // project-management, video-conferencing, website (all 2–8K logos)
 }
 
 // ─── Static fallback data (real vcstack.io categories) ────────────────────────
