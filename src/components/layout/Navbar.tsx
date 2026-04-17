@@ -35,10 +35,11 @@ const CATEGORIES = [
 ]
 
 const RESOURCE_LINKS = [
-  { label: 'VC Stacks',       href: '/stacks',         desc: 'See what tools top VCs use' },
-  { label: 'Pitch Decks',     href: '/pitch-decks',    desc: 'Real pitch decks from VC funds' },
-  { label: 'Submit Product',  href: '/submit-product', desc: 'Add a tool to our directory' },
-  { label: 'Share your Stack', href: '/share-stack',   desc: 'Share the tools your firm uses' },
+  { label: 'VC Tool Stacks',   href: '/stacks',         desc: 'See what tools top VCs use' },
+  { label: 'VC Pitch Decks',   href: '/pitch-decks',    desc: 'Real pitch decks from VC funds' },
+  { label: 'Market Map',       href: '/market-map',     desc: 'Visual overview of the VC tool landscape' },
+  { label: 'Submit Product',   href: '/submit-product', desc: 'Add a tool to our directory' },
+  { label: 'Share your Stack', href: '/share-stack',    desc: 'Share the tools your firm uses' },
 ]
 
 export default function Navbar() {
