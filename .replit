@@ -42,3 +42,15 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["npm", "run", "start"]
+build = ["npm", "run", "build"]
+
+[userenv]
+
+[userenv.shared]
+NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/admin/login"
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/admin/dashboard"
+NEXT_PUBLIC_CLERK_SIGN_OUT_URL = "/admin/login"
