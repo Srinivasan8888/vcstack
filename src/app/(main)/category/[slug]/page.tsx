@@ -7,6 +7,45 @@ import ToolCard from '@/components/cards/ToolCard'
 import PricingFilter from '@/components/filters/PricingFilter'
 import type { PricingModel } from '@/lib/types'
 
+/* ── Category banner colours (same palette as CategoryCard) ── */
+const CATEGORY_COLORS: Record<string, string> = {
+  'deal-sourcing':                        '#F4C553',
+  'crm':                                  '#F4C553',
+  'portfolio-management':                 '#8AB899',
+  'fund-admin-software':                  '#F4C553',
+  'lp-tools':                             '#A9A4D4',
+  'data-room':                            '#F4C553',
+  'data':                                 '#7FAECC',
+  'captable-equity-management':           '#F4C553',
+  'research':                             '#7FAECC',
+  'video-conferencing':                   '#8AB899',
+  'fund-modeling-portfolio-forecasting':  '#8AB899',
+  'project-management':                   '#A9A4D4',
+  'email':                                '#F4C553',
+  'platform':                             '#F4C553',
+  'esg':                                  '#A9A4D4',
+  'hiring-payroll':                       '#D9897A',
+  'infrastructure':                       '#F4C553',
+  'insurance':                            '#8AB899',
+  'job-board-talent-pool':               '#A9A4D4',
+  'liquidity-instruments':               '#F4C553',
+  'newsletter-tools':                    '#F4C553',
+  'news-resources':                      '#D9897A',
+  'community':                           '#A9A4D4',
+  'calendar':                            '#8AB899',
+  'other-tools':                         '#F4C553',
+  'website':                             '#8AB899',
+}
+
+/* Chip positions for the banner — fanned across the right side */
+const BANNER_CHIP_POSITIONS = [
+  { top: '18%', right: '8%',  rotate: '-6deg' },
+  { top: '12%', right: '28%', rotate:  '5deg' },
+  { top: '50%', right: '15%', rotate:  '3deg' },
+  { top: '45%', right: '35%', rotate: '-4deg' },
+  { top: '68%', right: '5%',  rotate:  '7deg' },
+]
+
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ pricing?: string; page?: string }>
@@ -46,11 +85,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (!category) notFound()
 
   const { data: tools, total, totalPages } = result
+  const bgColor = CATEGORY_COLORS[slug] ?? '#F4C553'
+
+  /* Pick up to 5 tools with logos for the banner chips */
+  const bannerTools = tools
+    .filter((t) => t.logoUrl)
+    .slice(0, 5)
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6">
         <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
         <ChevronRight className="h-3 w-3" />
         <Link href="/all-categories" className="hover:text-foreground transition-colors">Categories</Link>
@@ -58,47 +103,63 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <span className="text-foreground">{category.name}</span>
       </nav>
 
-      {/* Category banner image */}
-      {category.imageUrl && (
-        <div className="relative h-48 md:h-56 w-full rounded-2xl overflow-hidden mb-8">
-          <img
-            src={category.imageUrl}
-            alt={category.name}
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-5 left-6 flex items-center gap-3">
-            {category.icon && (
-              <span className="text-3xl drop-shadow-md">{category.icon}</span>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold text-white drop-shadow-md">{category.name}</h1>
-              <p className="text-sm text-white/80 font-medium">{total} tools</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Coloured banner ─────────────────────────────────────────────── */}
+      <div
+        className="relative w-full rounded-2xl overflow-hidden mb-8"
+        style={{ backgroundColor: bgColor, minHeight: 160 }}
+      >
+        {/* Decorative soft circles */}
+        <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/15" />
+        <div className="absolute -top-10 -left-10 h-36 w-36 rounded-full bg-white/10" />
+        <div className="absolute top-6 left-6 h-20 w-20 rounded-full bg-white/10" />
 
-      {/* Category header (fallback when no image) */}
-      {!category.imageUrl && (
-        <div className="flex items-start gap-4 mb-8">
+        {/* Category info — bottom-left */}
+        <div className="absolute bottom-5 left-6 flex items-center gap-3">
           {category.icon && (
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-2xl shrink-0">
-              {category.icon}
-            </div>
+            <span className="text-3xl">{category.icon}</span>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{category.name}</h1>
-            {category.description && (
-              <p className="text-muted-foreground mt-1 max-w-2xl">{category.description}</p>
-            )}
-            <p className="text-sm text-primary mt-2 font-medium">{total} tools</p>
+            <h1 className="text-2xl font-bold text-gray-900">{category.name}</h1>
+            <p className="text-sm text-gray-800/70 font-medium">{total} tools</p>
           </div>
         </div>
-      )}
 
-      {/* Category description (below banner) */}
-      {category.imageUrl && category.description && (
+        {/* Floating tool logo chips — right side */}
+        {bannerTools.map((tool, i) => {
+          const pos = BANNER_CHIP_POSITIONS[i]
+          if (!pos) return null
+          const initials = tool.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+          const hue = (tool.name.charCodeAt(0) * 53 + (tool.name.charCodeAt(1) ?? 0) * 37) % 360
+          return (
+            <div
+              key={tool.id}
+              className="absolute flex items-center gap-1.5 bg-white rounded-lg shadow-md px-2 py-1.5 pointer-events-none select-none"
+              style={{ top: pos.top, right: pos.right, rotate: pos.rotate, zIndex: 10 }}
+            >
+              {tool.logoUrl ? (
+                <img
+                  src={tool.logoUrl}
+                  alt={tool.name}
+                  className="h-6 w-6 rounded object-contain shrink-0"
+                />
+              ) : (
+                <span
+                  className="h-6 w-6 rounded flex items-center justify-center text-[9px] font-bold text-white shrink-0"
+                  style={{ background: `oklch(0.50 0.20 ${hue})` }}
+                >
+                  {initials}
+                </span>
+              )}
+              <span className="text-[11px] font-semibold text-gray-700 leading-tight truncate max-w-[80px]">
+                {tool.name}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Description below banner */}
+      {category.description && (
         <p className="text-muted-foreground mb-8 max-w-2xl">{category.description}</p>
       )}
 

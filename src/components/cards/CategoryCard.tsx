@@ -4,48 +4,103 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { Category } from '@/lib/types'
 
-/* Deterministic gradient per category slug */
-const SLUG_GRADIENTS: Record<string, string> = {
-  'deal-sourcing':                       'from-violet-500 to-purple-700',
-  'crm':                                 'from-blue-500 to-indigo-700',
-  'portfolio-management':                'from-emerald-500 to-teal-700',
-  'fund-admin-software':                 'from-amber-500 to-orange-600',
-  'lp-tools':                            'from-sky-500 to-cyan-700',
-  'data-room':                           'from-slate-500 to-gray-700',
-  'data':                                'from-yellow-500 to-amber-600',
-  'captable-equity-management':          'from-purple-500 to-violet-700',
-  'research':                            'from-fuchsia-500 to-purple-700',
-  'video-conferencing':                  'from-red-400 to-rose-600',
-  'fund-modeling-portfolio-forecasting': 'from-amber-400 to-yellow-600',
-  'project-management':                  'from-indigo-500 to-blue-700',
-  'email':                               'from-cyan-500 to-sky-700',
-  'platform':                            'from-orange-500 to-red-600',
-  'esg':                                 'from-green-500 to-emerald-700',
-  'hiring-payroll':                      'from-lime-500 to-green-700',
-  'infrastructure':                      'from-zinc-500 to-slate-700',
-  'insurance':                           'from-teal-500 to-green-700',
-  'job-board-talent-pool':               'from-blue-400 to-indigo-600',
-  'liquidity-instruments':               'from-rose-500 to-pink-700',
-  'newsletter-tools':                    'from-orange-400 to-amber-600',
-  'news-resources':                      'from-red-500 to-orange-700',
-  'community':                           'from-violet-400 to-fuchsia-600',
-  'calendar':                            'from-sky-400 to-blue-600',
-  'other-tools':                         'from-gray-500 to-zinc-700',
-  'website':                             'from-pink-400 to-rose-600',
+export interface PreviewTool {
+  name: string
+  logoUrl?: string | null
 }
 
-function gradientFor(slug: string) {
-  return SLUG_GRADIENTS[slug] ?? 'from-primary/60 to-primary'
+/* ── Flat background colours per category (matches real vcstack.io palette) ── */
+const CATEGORY_COLORS: Record<string, string> = {
+  'deal-sourcing':                        '#F4C553',
+  'crm':                                  '#F4C553',
+  'portfolio-management':                 '#8AB899',
+  'fund-admin-software':                  '#F4C553',
+  'lp-tools':                             '#A9A4D4',
+  'data-room':                            '#F4C553',
+  'data':                                 '#7FAECC',
+  'captable-equity-management':           '#F4C553',
+  'research':                             '#7FAECC',
+  'video-conferencing':                   '#8AB899',
+  'fund-modeling-portfolio-forecasting':  '#8AB899',
+  'project-management':                   '#A9A4D4',
+  'email':                                '#F4C553',
+  'platform':                             '#F4C553',
+  'esg':                                  '#A9A4D4',
+  'hiring-payroll':                       '#D9897A',
+  'infrastructure':                       '#F4C553',
+  'insurance':                            '#8AB899',
+  'job-board-talent-pool':               '#A9A4D4',
+  'liquidity-instruments':               '#F4C553',
+  'newsletter-tools':                    '#F4C553',
+  'news-resources':                      '#D9897A',
+  'community':                           '#A9A4D4',
+  'calendar':                            '#8AB899',
+  'other-tools':                         '#F4C553',
+  'website':                             '#8AB899',
+}
+
+/* Chip positions — fanned from center-left to upper-right */
+const CHIP_PLACEMENTS = [
+  { top: '10%',  left: '32%',  rotate: '-8deg'  },
+  { top: '38%',  left: '50%',  rotate:  '4deg'  },
+  { top: '56%',  left: '30%',  rotate: '-2deg'  },
+  { top: '20%',  left: '60%',  rotate:  '9deg'  },
+]
+
+/* Single floating chip */
+function LogoChip({ tool, placement }: {
+  tool: PreviewTool
+  placement: typeof CHIP_PLACEMENTS[number]
+}) {
+  const initials = tool.name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
+  const hue = (tool.name.charCodeAt(0) * 53 + (tool.name.charCodeAt(1) ?? 0) * 37) % 360
+
+  return (
+    <div
+      className="absolute flex items-center gap-1.5 bg-white rounded-lg shadow-md px-2 py-1.5 max-w-[108px] pointer-events-none select-none"
+      style={{ top: placement.top, left: placement.left, rotate: placement.rotate, zIndex: 10 }}
+    >
+      {tool.logoUrl ? (
+        <img
+          src={tool.logoUrl}
+          alt={tool.name}
+          className="h-5 w-5 rounded object-contain shrink-0"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+        />
+      ) : (
+        <span
+          className="h-5 w-5 rounded flex items-center justify-center text-[8px] font-bold text-white shrink-0"
+          style={{ background: `oklch(0.50 0.20 ${hue})` }}
+        >
+          {initials}
+        </span>
+      )}
+      <span className="text-[10px] font-semibold text-gray-700 leading-tight truncate">
+        {tool.name}
+      </span>
+    </div>
+  )
 }
 
 interface CategoryCardProps {
   category: Category
+  previewTools?: PreviewTool[]
   variant?: 'default' | 'compact'
 }
 
-export default function CategoryCard({ category, variant = 'default' }: CategoryCardProps) {
+export default function CategoryCard({
+  category,
+  previewTools = [],
+  variant = 'default',
+}: CategoryCardProps) {
   const toolCount = category._count?.tools ?? 0
-  const gradient = gradientFor(category.slug)
+  const bgColor = CATEGORY_COLORS[category.slug] ?? '#F4C553'
 
   if (variant === 'compact') {
     return (
@@ -67,34 +122,27 @@ export default function CategoryCard({ category, variant = 'default' }: Category
     )
   }
 
+  const chips = previewTools.slice(0, 4)
+
   return (
     <Link
       href={`/category/${category.slug}`}
       className="group relative flex flex-col rounded-2xl border border-border bg-white overflow-hidden card-hover"
     >
-      {/* Header: gradient always visible as background; CDN image overlaid if available */}
-      <div className={`relative h-40 w-full overflow-hidden bg-linear-to-br ${gradient} flex items-end p-4`}>
-        {/* Decorative circles */}
-        <div className="absolute -bottom-8 -right-8 h-36 w-36 rounded-full bg-white/10" />
-        <div className="absolute -top-6 -left-6 h-24 w-24 rounded-full bg-white/10" />
+      {/* Header: solid colour + floating logo chips */}
+      <div
+        className="relative h-40 w-full overflow-hidden"
+        style={{ backgroundColor: bgColor }}
+      >
+        {/* Decorative soft circles */}
+        <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-white/15" />
+        <div className="absolute -top-8 -left-8 h-28 w-28 rounded-full bg-white/10" />
+        <div className="absolute top-4 left-4 h-16 w-16 rounded-full bg-white/10" />
 
-        {/* CDN image overlaid — gradient shows if this fails to load */}
-        {category.imageUrl && (
-          <img
-            src={category.imageUrl}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-          />
-        )}
-
-        {/* Overlay so text is legible on both gradient and photo */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
-
-        {/* Icon */}
-        <span className="relative z-10 text-4xl drop-shadow-md">
-          {category.icon ?? '🔧'}
-        </span>
+        {/* Floating tool chips */}
+        {chips.map((tool, i) => (
+          <LogoChip key={tool.name} tool={tool} placement={CHIP_PLACEMENTS[i]} />
+        ))}
       </div>
 
       {/* Content */}

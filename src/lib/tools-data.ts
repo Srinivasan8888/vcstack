@@ -13,10 +13,111 @@ export function setCategoryResolver(fn: (id: string) => Category) {
   _catResolver = fn
 }
 
-// Logo / screenshot overrides injected by the apply_logos.py script.
-// Keys are tool slugs, values are CDN URLs from vcstack.io.
-// AUTO-GENERATED — do not edit manually, run: python3 apply_logos.py
+// Logo overrides — Google favicon API (free, reliable, no auth)
+// Format: https://www.google.com/s2/favicons?domain={domain}&sz=128
+const G = (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+
 const LOGO_OVERRIDES: Record<string, string> = {
+  // ── Deal Sourcing ─────────────────────────────────────────────────────────
+  'pitchbook':          G('pitchbook.com'),
+  'cb-insights':        G('cbinsights.com'),
+  'crunchbase':         G('crunchbase.com'),
+  'harmonic':           G('harmonic.ai'),
+  'tracxn':             G('tracxn.com'),
+  'dealroom':           G('dealroom.co'),
+  'grata':              G('grata.com'),
+  'sourcescrub':        G('sourcescrub.com'),
+  'angellist':          G('angellist.com'),
+  'product-hunt':       G('producthunt.com'),
+  'ourcrowd':           G('ourcrowd.com'),
+  'republic':           G('republic.com'),
+  'crowdcube':          G('crowdcube.com'),
+  'flippa':             G('flippa.com'),
+  'wefunder':           G('wefunder.com'),
+  // ── CRM ──────────────────────────────────────────────────────────────────
+  'affinity':           G('affinity.co'),
+  'attio':              G('attio.com'),
+  'salesforce':         G('salesforce.com'),
+  'hubspot':            G('hubspot.com'),
+  'pipedrive':          G('pipedrive.com'),
+  'copper':             G('copper.com'),
+  'close':              G('close.com'),
+  'streak':             G('streak.com'),
+  'folk':               G('folk.app'),
+  'notion':             G('notion.so'),
+  'airtable':           G('airtable.com'),
+  // ── Portfolio Management ──────────────────────────────────────────────────
+  'visible':            G('visible.vc'),
+  'carta':              G('carta.com'),
+  'edda':               G('edda.co'),
+  'causal':             G('causal.app'),
+  // ── Fund Admin ────────────────────────────────────────────────────────────
+  'juniper-square':     G('junipersquare.com'),
+  'allvue':             G('allvue.com'),
+  // ── Data Room ─────────────────────────────────────────────────────────────
+  'docsend':            G('docsend.com'),
+  'dropbox':            G('dropbox.com'),
+  'box':                G('box.com'),
+  'digify':             G('digify.com'),
+  'intralinks':         G('intralinks.com'),
+  'datasite':           G('datasite.com'),
+  // ── Research ─────────────────────────────────────────────────────────────
+  'linkedin':           G('linkedin.com'),
+  'semrush':            G('semrush.com'),
+  'similarweb':         G('similarweb.com'),
+  'g2':                 G('g2.com'),
+  'glassdoor':          G('glassdoor.com'),
+  'owler':              G('owler.com'),
+  // ── Email ─────────────────────────────────────────────────────────────────
+  'mailchimp':          G('mailchimp.com'),
+  'sendgrid':           G('sendgrid.com'),
+  'klaviyo':            G('klaviyo.com'),
+  'constant-contact':   G('constantcontact.com'),
+  // ── ESG ──────────────────────────────────────────────────────────────────
+  'workiva':            G('workiva.com'),
+  'novata':             G('novata.com'),
+  // ── Hiring & Payroll ─────────────────────────────────────────────────────
+  'greenhouse':         G('greenhouse.io'),
+  'lever':              G('lever.co'),
+  'workable':           G('workable.com'),
+  'rippling':           G('rippling.com'),
+  'gusto':              G('gusto.com'),
+  'deel':               G('deel.com'),
+  'remote':             G('remote.com'),
+  // ── Infrastructure / Platform ─────────────────────────────────────────────
+  'slack':              G('slack.com'),
+  'linear':             G('linear.app'),
+  'webflow':            G('webflow.com'),
+  'wordpress':          G('wordpress.com'),
+  'squarespace':        G('squarespace.com'),
+  'framer':             G('framer.com'),
+  'ghost':              G('ghost.org'),
+  // ── Calendar ─────────────────────────────────────────────────────────────
+  'calendly':           G('calendly.com'),
+  'cal-com':            G('cal.com'),
+  'savvycal':           G('savvycal.com'),
+  'doodle':             G('doodle.com'),
+  // ── Video Conferencing ────────────────────────────────────────────────────
+  'zoom':               G('zoom.us'),
+  'loom':               G('loom.com'),
+  // ── Project Management ────────────────────────────────────────────────────
+  'asana':              G('asana.com'),
+  'monday-com':         G('monday.com'),
+  'trello':             G('trello.com'),
+  'clickup':            G('clickup.com'),
+  'basecamp':           G('basecamp.com'),
+  // ── Newsletter ───────────────────────────────────────────────────────────
+  'substack':           G('substack.com'),
+  'beehiiv':            G('beehiiv.com'),
+  'convertkit':         G('convertkit.com'),
+  // ── Captable ─────────────────────────────────────────────────────────────
+  'pulley':             G('pulley.com'),
+  // ── Community ────────────────────────────────────────────────────────────
+  'circle':             G('circle.so'),
+  'discord':            G('discord.com'),
+  'mighty-networks':    G('mightynetworks.com'),
+  // ── LP Tools ─────────────────────────────────────────────────────────────
+  'dynamo':             G('dynamosoftware.com'),
 }
 
 const SCREENSHOT_OVERRIDES: Record<string, string> = {
@@ -35,9 +136,18 @@ function t(
   logoUrl: string | null = null,
   screenshotUrl: string | null = null,
 ): Tool {
+  // Auto-derive logo from websiteUrl when no explicit override or logoUrl given
+  let resolvedLogo = LOGO_OVERRIDES[slug] ?? logoUrl ?? null
+  if (!resolvedLogo && websiteUrl) {
+    try {
+      const domain = new URL(websiteUrl).hostname.replace(/^www\./, '')
+      resolvedLogo = G(domain)
+    } catch { /* malformed URL — skip */ }
+  }
+
   return {
     id, name, slug, shortDesc, description, websiteUrl,
-    logoUrl: LOGO_OVERRIDES[slug] ?? logoUrl ?? null,
+    logoUrl: resolvedLogo,
     screenshotUrl: SCREENSHOT_OVERRIDES[slug] ?? screenshotUrl ?? null,
     pricingModel, isFeatured, categoryId, category: _catResolver(categoryId),
     tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
