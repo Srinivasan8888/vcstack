@@ -11,18 +11,67 @@ export default function SubmitProductForm({ categories }: { categories: Category
 
   if (state.success) {
     return (
-      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center">
-        <p className="text-3xl mb-3">🎉</p>
-        <h2 className="text-lg font-semibold text-foreground mb-2">Submission received!</h2>
-        <p className="text-sm text-muted-foreground">{state.message}</p>
+      <div
+        style={{
+          border: '2px solid var(--ink)',
+          padding: 40,
+          textAlign: 'center',
+          background: 'var(--paper-alt)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--success)',
+            marginBottom: 14,
+          }}
+        >
+          Received · File No. {Math.floor(Math.random() * 9000 + 1000)}
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: '1.8rem',
+            color: 'var(--ink)',
+            marginBottom: 12,
+            lineHeight: 1.1,
+          }}
+        >
+          Submission received.
+        </h2>
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1.05rem',
+            fontStyle: 'italic',
+            color: 'var(--ink-light)',
+          }}
+        >
+          {state.message}
+        </p>
       </div>
     )
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {state.message && !state.success && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          style={{
+            border: '1px solid var(--red)',
+            background: 'rgba(192, 57, 43, 0.06)',
+            padding: '12px 16px',
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            color: 'var(--red)',
+          }}
+        >
           {state.message}
         </div>
       )}
@@ -33,7 +82,7 @@ export default function SubmitProductForm({ categories }: { categories: Category
           name="toolName"
           placeholder="e.g. Affinity"
           required
-          className={inputCls}
+          style={inputStyle}
         />
       </Field>
 
@@ -43,12 +92,12 @@ export default function SubmitProductForm({ categories }: { categories: Category
           name="websiteUrl"
           placeholder="https://example.com"
           required
-          className={inputCls}
+          style={inputStyle}
         />
       </Field>
 
       <Field label="Category" name="categoryId" required error={state.errors?.categoryId?.[0]}>
-        <select name="categoryId" required className={inputCls}>
+        <select name="categoryId" required style={inputStyle}>
           <option value="">Select a category…</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
@@ -59,10 +108,10 @@ export default function SubmitProductForm({ categories }: { categories: Category
       <Field label="Description" name="description" required error={state.errors?.description?.[0]}>
         <textarea
           name="description"
-          rows={4}
+          rows={5}
           required
           placeholder="Describe what the tool does and why VCs use it…"
-          className={`${inputCls} resize-none`}
+          style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--body)' }}
         />
       </Field>
 
@@ -72,17 +121,32 @@ export default function SubmitProductForm({ categories }: { categories: Category
           name="submitterEmail"
           placeholder="you@example.com"
           required
-          className={inputCls}
+          style={inputStyle}
         />
       </Field>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className="btn btn--primary"
+        style={{ marginTop: 8 }}
       >
-        {pending ? 'Submitting…' : 'Submit Tool for Review'}
+        {pending ? 'Filing…' : 'File Submission →'}
       </button>
+
+      <p
+        style={{
+          fontFamily: 'var(--mono)',
+          fontSize: 'var(--fs-tag)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--ink-muted)',
+          textAlign: 'center',
+          marginTop: 4,
+        }}
+      >
+        Reviewed within 48 hours · Editors' discretion applies
+      </p>
     </form>
   )
 }
@@ -102,15 +166,49 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-foreground mb-1.5">
+      <label
+        htmlFor={name}
+        style={{
+          display: 'block',
+          fontFamily: 'var(--mono)',
+          fontSize: 'var(--fs-tag)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--ink)',
+          marginBottom: 8,
+          fontWeight: 600,
+        }}
+      >
         {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
+        {required && <span style={{ color: 'var(--red)', marginLeft: 4 }}>*</span>}
       </label>
       {children}
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {error && (
+        <p
+          style={{
+            marginTop: 6,
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            color: 'var(--red)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+          }}
+        >
+          {error}
+        </p>
+      )}
     </div>
   )
 }
 
-const inputCls =
-  'w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all'
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'var(--paper)',
+  border: '1px solid var(--ink)',
+  padding: '10px 12px',
+  fontFamily: 'var(--body)',
+  fontSize: '1rem',
+  color: 'var(--ink)',
+  borderRadius: 0,
+  outline: 'none',
+}

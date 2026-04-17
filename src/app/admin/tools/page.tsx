@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { searchTools } from '@/lib/data'
-import { ExternalLink, Plus, Pencil } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Tools' }
+export const metadata: Metadata = { title: 'Tools — Editor’s Desk' }
 
-const PRICING_LABELS: Record<string, string> = { FREE: 'Free', FREEMIUM: 'Freemium', PAID: 'Paid', ENTERPRISE: 'Enterprise' }
-const PRICING_CLASSES: Record<string, string> = { FREE: 'badge-free', FREEMIUM: 'badge-freemium', PAID: 'badge-paid', ENTERPRISE: 'badge-enterprise' }
+const PRICING_LABELS: Record<string, string> = {
+  FREE: 'Free',
+  FREEMIUM: 'Freemium',
+  PAID: 'Paid',
+  ENTERPRISE: 'Enterprise',
+}
 
 interface Props { searchParams: Promise<{ page?: string; q?: string }> }
 
@@ -16,69 +19,154 @@ export default async function AdminToolsPage({ searchParams }: Props) {
   const { data: tools, total, totalPages } = await searchTools({ query: q, page, pageSize: 20 })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Tools</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{total} total</p>
-        </div>
-        <Link
-          href="/admin/tools/new"
-          className="flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+    <div style={{ padding: '32px 40px 64px' }}>
+      <header
+        style={{
+          borderTop: '3px double var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '20px 0',
+          marginBottom: 24,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 8,
+          }}
         >
-          <Plus className="h-4 w-4" /> Add Tool
-        </Link>
-      </div>
+          The Index · {total} entries
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 }}>
+          <h1
+            style={{
+              fontFamily: 'var(--serif)',
+              fontWeight: 900,
+              fontSize: 'var(--fs-name)',
+              color: 'var(--ink)',
+              lineHeight: 1.1,
+            }}
+          >
+            Tools on the Paper
+          </h1>
+          <Link href="/admin/tools/new" className="btn btn--primary">
+            + New Entry
+          </Link>
+        </div>
+      </header>
 
-      {/* Search */}
-      <form className="mb-4">
+      <form style={{ marginBottom: 20 }}>
         <input
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Search tools…"
-          className="w-full max-w-sm rounded-lg border border-border bg-secondary px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          placeholder="Search the index…"
+          style={{
+            width: '100%',
+            maxWidth: 420,
+            background: 'var(--paper)',
+            border: '1px solid var(--ink)',
+            padding: '10px 12px',
+            fontFamily: 'var(--body)',
+            fontSize: '0.95rem',
+            color: 'var(--ink)',
+            outline: 'none',
+            borderRadius: 0,
+          }}
         />
       </form>
 
-      {/* Table */}
-      <div className="rounded-xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-secondary border-b border-border">
-            <tr>
-              {['Name', 'Category', 'Pricing', 'Featured', ''].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+      <div style={{ border: '1px solid var(--ink)', overflow: 'hidden' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontFamily: 'var(--body)',
+            fontSize: '0.95rem',
+          }}
+        >
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--ink)', background: 'var(--paper-alt)' }}>
+              {['Name', 'Section', 'Pricing', 'Featured', ''].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    fontFamily: 'var(--mono)',
+                    fontSize: 'var(--fs-tag)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.14em',
+                    color: 'var(--ink-muted)',
+                    fontWeight: 600,
+                  }}
+                >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-card">
+          <tbody>
             {tools.map((tool) => (
-              <tr key={tool.id} className="hover:bg-secondary/50 transition-colors">
-                <td className="px-4 py-3 font-medium text-foreground">
-                  <Link href={`/product/${tool.slug}`} className="hover:text-primary transition-colors flex items-center gap-1">
+              <tr key={tool.id} style={{ borderBottom: '1px solid var(--rule)' }}>
+                <td style={{ padding: '10px 14px' }}>
+                  <Link
+                    href={`/product/${tool.slug}`}
+                    style={{
+                      fontFamily: 'var(--serif)',
+                      fontWeight: 700,
+                      color: 'var(--ink)',
+                      textDecoration: 'none',
+                    }}
+                  >
                     {tool.name}
-                    <ExternalLink className="h-3 w-3 opacity-40" />
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{tool.category?.name ?? '—'}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${PRICING_CLASSES[tool.pricingModel] ?? 'badge-paid'}`}>
-                    {PRICING_LABELS[tool.pricingModel]}
+                <td style={{ padding: '10px 14px', color: 'var(--ink-light)' }}>
+                  {tool.category?.name ?? '—'}
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.14em',
+                      color: 'var(--ink-light)',
+                    }}
+                  >
+                    {PRICING_LABELS[tool.pricingModel] ?? tool.pricingModel}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs font-medium ${tool.isFeatured ? 'text-primary' : 'text-muted-foreground'}`}>
+                <td style={{ padding: '10px 14px' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.14em',
+                      color: tool.isFeatured ? 'var(--red)' : 'var(--ink-muted)',
+                    }}
+                  >
                     {tool.isFeatured ? '★ Yes' : 'No'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td style={{ padding: '10px 14px', textAlign: 'right' }}>
                   <Link
                     href={`/admin/tools/${tool.id}/edit`}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.14em',
+                      color: 'var(--red)',
+                      textDecoration: 'none',
+                    }}
                   >
-                    <Pencil className="h-3 w-3" /> Edit
+                    Edit →
                   </Link>
                 </td>
               </tr>
@@ -87,16 +175,32 @@ export default async function AdminToolsPage({ searchParams }: Props) {
         </table>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 4,
+            marginTop: 24,
+          }}
+        >
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
               href={`/admin/tools?page=${p}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-              className={`h-8 w-8 flex items-center justify-center rounded-md text-sm transition-colors ${
-                p === page ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:bg-secondary'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 32,
+                height: 32,
+                border: '1px solid var(--rule)',
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-btn)',
+                textDecoration: 'none',
+                background: p === page ? 'var(--ink)' : 'var(--paper)',
+                color: p === page ? 'var(--paper)' : 'var(--ink-light)',
+              }}
             >
               {p}
             </Link>

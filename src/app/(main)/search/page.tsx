@@ -8,7 +8,7 @@ import type { PricingModel } from '@/lib/types'
 
 export const metadata: Metadata = {
   title: 'Search Tools',
-  description: 'Search and filter 300+ VC tools by category, pricing, and use case.',
+  description: 'Search and filter 500+ VC tools by category, pricing, and use case.',
 }
 
 interface Props {
@@ -33,93 +33,157 @@ export default async function SearchPage({ searchParams }: Props) {
   const { data: tools, total, totalPages } = result
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      {/* Search header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground mb-4">
-          {q ? `Results for "${q}"` : 'Search Tools'}
-        </h1>
-        <SearchBox defaultValue={q} />
+    <div className="page" style={{ padding: '24px 24px 48px' }}>
+      <div className="breadcrumb">
+        <Link href="/">Home</Link>
+        <span className="sep">·</span>
+        <span style={{ color: 'var(--ink)' }}>Search</span>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
-        <aside className="lg:w-56 shrink-0 space-y-6">
+      <header
+        style={{
+          borderTop: '2px solid var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '20px 0',
+          marginBottom: 28,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 8,
+          }}
+        >
+          The Archive
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'var(--fs-name)',
+            color: 'var(--ink)',
+            lineHeight: 1.1,
+            marginBottom: 16,
+          }}
+        >
+          {q ? `Results for “${q}”` : 'Search the paper'}
+        </h1>
+        <SearchBox defaultValue={q} />
+        <p
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            color: 'var(--ink-muted)',
+            marginTop: 16,
+          }}
+        >
+          {total} {total === 1 ? 'match' : 'matches'}
+        </p>
+      </header>
+
+      <div style={{ display: 'grid', gap: 32 }} className="lg:grid-cols-[220px_1fr]">
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <PricingFilter currentPricing={pricing} basePath="/search" />
 
-          {/* Category filter */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-              Category
-            </h3>
-            <div className="flex flex-col gap-1">
+            <div className="section-header">Category</div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <Link
                 href={`/search${q ? `?q=${encodeURIComponent(q)}` : ''}`}
-                className={`rounded-md px-3 py-2 text-sm transition-colors ${
-                  !category
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                }`}
+                style={{
+                  fontFamily: 'var(--mono)',
+                  fontSize: 'var(--fs-btn)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  padding: '8px 0',
+                  borderBottom: '1px solid var(--rule)',
+                  color: !category ? 'var(--red)' : 'var(--ink-light)',
+                  textDecoration: 'none',
+                  fontWeight: !category ? 700 : 500,
+                }}
               >
-                All Categories
+                {!category ? '▸ ' : '  '}All Categories
               </Link>
-              {categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/search?${q ? `q=${encodeURIComponent(q)}&` : ''}category=${cat.slug}`}
-                  className={`rounded-md px-3 py-2 text-sm transition-colors truncate ${
-                    category === cat.slug
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                  }`}
-                >
-                  {cat.icon && <span className="mr-1.5">{cat.icon}</span>}
-                  {cat.name}
-                </Link>
-              ))}
+              {categories.map((cat) => {
+                const isActive = category === cat.slug
+                return (
+                  <Link
+                    key={cat.id}
+                    href={`/search?${q ? `q=${encodeURIComponent(q)}&` : ''}category=${cat.slug}`}
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-btn)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.12em',
+                      padding: '8px 0',
+                      borderBottom: '1px solid var(--rule)',
+                      color: isActive ? 'var(--red)' : 'var(--ink-light)',
+                      textDecoration: 'none',
+                      fontWeight: isActive ? 700 : 500,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {isActive ? '▸ ' : '  '}{cat.name}
+                  </Link>
+                )
+              })}
             </div>
           </div>
         </aside>
 
-        {/* Results */}
-        <div className="flex-1">
-          <p className="text-sm text-muted-foreground mb-4">
-            {total} {total === 1 ? 'tool' : 'tools'} found
-          </p>
-
+        <div>
           {tools.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <p className="text-4xl mb-4">🔍</p>
-              <p className="text-foreground font-medium mb-1">No tools found</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Try a different search term or remove filters
+            <div className="empty">
+              <p style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', marginBottom: 6 }}>
+                No matches found.
               </p>
-              <Link
-                href="/search"
-                className="text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                Clear all filters
-              </Link>
+              <p style={{ marginBottom: 14 }}>Try a different term or clear filters.</p>
+              <Link href="/search" className="btn btn--ghost">Clear all filters</Link>
             </div>
           ) : (
             <>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {tools.map((tool) => (
-                  <ToolCard key={tool.id} tool={tool} />
+              <div className="grid gap-0 sm:grid-cols-2 xl:grid-cols-3">
+                {tools.map((tool, i) => (
+                  <div key={tool.id} style={{ marginLeft: -1, marginTop: -1 }}>
+                    <ToolCard tool={tool} index={i} />
+                  </div>
                 ))}
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-10">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: 4,
+                    marginTop: 32,
+                    fontFamily: 'var(--mono)',
+                    fontSize: 'var(--fs-btn)',
+                  }}
+                >
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <Link
                       key={p}
                       href={`/search?${q ? `q=${encodeURIComponent(q)}&` : ''}${category ? `category=${category}&` : ''}${pricing ? `pricing=${pricing}&` : ''}page=${p}`}
-                      className={`h-8 w-8 flex items-center justify-center rounded-md text-sm transition-colors ${
-                        p === page
-                          ? 'bg-primary text-primary-foreground'
-                          : 'border border-border text-muted-foreground hover:text-foreground hover:bg-secondary'
-                      }`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 32,
+                        height: 32,
+                        border: '1px solid var(--rule)',
+                        textDecoration: 'none',
+                        background: p === page ? 'var(--ink)' : 'var(--paper)',
+                        color: p === page ? 'var(--paper)' : 'var(--ink-light)',
+                      }}
                     >
                       {p}
                     </Link>

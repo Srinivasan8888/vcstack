@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Send } from 'lucide-react'
 
 export default function NewsletterForm() {
   const [email, setEmail] = useState('')
@@ -14,29 +13,34 @@ export default function NewsletterForm() {
 
   if (submitted) {
     return (
-      <p className="text-sm font-medium text-emerald-600 mt-4">
-        Thanks for subscribing! You&apos;ll hear from us soon.
+      <p
+        style={{
+          fontFamily: 'var(--body)',
+          fontSize: 'var(--fs-body)',
+          color: 'var(--success)',
+          marginTop: 12,
+        }}
+      >
+        <strong>Subscribed.</strong> Your confirmation is on its way.
       </p>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 flex gap-2 max-w-sm">
+    <form
+      onSubmit={handleSubmit}
+      style={{ display: 'flex', gap: 8, marginTop: 12, maxWidth: 420 }}
+    >
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
+        placeholder="name@fund.com"
         required
-        className="flex-1 h-10 rounded-lg border border-border bg-secondary px-3 text-sm placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
+        className="input"
+        style={{ flex: 1 }}
       />
-      <button
-        type="submit"
-        className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-white hover:opacity-85 transition-opacity"
-      >
-        <Send className="h-3.5 w-3.5" />
-        Subscribe
-      </button>
+      <button type="submit" className="btn btn--primary">Subscribe</button>
     </form>
   )
 }

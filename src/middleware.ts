@@ -1,17 +1,20 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-const isAdminRoute = createRouteMatcher(['/admin(.*)'])
-const isSignInRoute = createRouteMatcher(['/admin/login(.*)'])
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isAdminRoute(req) && !isSignInRoute(req)) {
-    await auth.protect()
+  // Protect admin routes (except login)
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+    const session = request.cookies.get('indianvcs_admin')
+    if (session?.value !== 'authenticated') {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
   }
-})
+
+  return NextResponse.next()
+}
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/admin/:path*'],
 }

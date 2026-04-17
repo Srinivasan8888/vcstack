@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
 import { FIRMS } from '@/lib/resources-data'
 
 export const metadata: Metadata = {
@@ -11,43 +10,139 @@ export const metadata: Metadata = {
 
 export default function StacksPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
-        <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground">VC Stacks</span>
-      </nav>
-
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-3">VC Stacks</h1>
-        <p className="text-muted-foreground max-w-2xl">
-          Explore the software stacks used by leading venture capital firms.
-          See which tools they rely on for deal sourcing, CRM, portfolio management, and more.
-        </p>
+    <div className="page" style={{ padding: '24px 24px 48px' }}>
+      <div className="breadcrumb">
+        <Link href="/">Home</Link>
+        <span className="sep">·</span>
+        <span style={{ color: 'var(--ink)' }}>VC Stacks</span>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FIRMS.map((firm) => (
+      <header
+        style={{
+          borderTop: '2px solid var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '20px 0',
+          marginBottom: 28,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 8,
+          }}
+        >
+          Feature · The Stacks Column
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'var(--fs-name)',
+            lineHeight: 1.1,
+            color: 'var(--ink)',
+          }}
+        >
+          What the Best Funds Actually Run On
+        </h1>
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1.05rem',
+            color: 'var(--ink-light)',
+            marginTop: 10,
+            maxWidth: 720,
+            fontStyle: 'italic',
+          }}
+        >
+          Dispatches from {FIRMS.length} firms — their CRM of record, their deal-sourcing
+          rigs, the analytics they trust. Presented without marketing copy.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 0 }}>
+        {FIRMS.map((firm, i) => (
           <Link
             key={firm.slug}
             href={`/firms/${firm.slug}`}
-            className="group flex flex-col rounded-2xl border border-border bg-white overflow-hidden card-hover"
+            style={{
+              display: 'block',
+              padding: 20,
+              border: '1px solid var(--rule)',
+              background: 'var(--paper)',
+              textDecoration: 'none',
+              marginLeft: -1,
+              marginTop: -1,
+            }}
           >
-            <div className="relative h-44 bg-slate-50 flex items-center justify-center p-8">
-              <img src={firm.logo} alt={firm.name} className="max-h-full max-w-full object-contain" />
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-tag)',
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'var(--ink-muted)',
+                marginBottom: 8,
+              }}
+            >
+              No. {String(i + 1).padStart(2, '0')} · {firm.location}
             </div>
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                {firm.name}
-              </h3>
-              <p className="text-xs text-muted-foreground mb-2">{firm.location}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">
-                {firm.description}
-              </p>
-              <div className="mt-4 flex items-center gap-1.5">
-                <span className="text-sm font-medium text-brand">{firm.tools.length} tools</span>
-                <span className="text-xs text-muted-foreground">in their stack</span>
-              </div>
+            <div
+              style={{
+                height: 100,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 12,
+                borderBottom: '1px solid var(--rule)',
+                marginBottom: 12,
+              }}
+            >
+              <img
+                src={firm.logo}
+                alt={firm.name}
+                style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter: 'grayscale(1) contrast(1.1)' }}
+              />
+            </div>
+            <h3
+              style={{
+                fontFamily: 'var(--serif)',
+                fontWeight: 700,
+                fontSize: 'var(--fs-card)',
+                color: 'var(--ink)',
+                marginBottom: 6,
+              }}
+            >
+              {firm.name}
+            </h3>
+            <p
+              style={{
+                fontFamily: 'var(--body)',
+                fontSize: 'var(--fs-body)',
+                color: 'var(--ink-light)',
+                lineHeight: 1.5,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                marginBottom: 10,
+              }}
+            >
+              {firm.description}
+            </p>
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-tag)',
+                color: 'var(--red)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+              }}
+            >
+              {firm.tools.length} tools in stack →
             </div>
           </Link>
         ))}

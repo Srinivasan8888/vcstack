@@ -1,19 +1,18 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+import { isAuthenticated } from '@/lib/auth'
 import AdminSidebar from './AdminSidebar'
 
-export const metadata = { title: { template: '%s | Admin – VCStack', default: 'Admin' } }
+export const metadata = { title: { template: '%s | Admin – IndianVCs', default: 'Admin' } }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { userId } = await auth()
-  if (!userId) redirect('/admin/login')
+  // Middleware protects /admin/* except /admin/login.
+  // If unauthenticated here, we must be on /admin/login → render standalone.
+  const authed = await isAuthenticated()
+  if (!authed) return <>{children}</>
 
   return (
-    <div className="fixed inset-0 flex bg-[oklch(0.08_0.025_265)] text-foreground overflow-hidden">
+    <div className="fixed inset-0 flex overflow-hidden" style={{ background: 'var(--paper)' }}>
       <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-auto">
-        {children}
-      </div>
+      <div className="flex-1 flex flex-col overflow-auto">{children}</div>
     </div>
   )
 }

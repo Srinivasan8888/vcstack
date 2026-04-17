@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import { CheckCircle, XCircle } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Submissions' }
+export const metadata: Metadata = { title: 'Submissions — Editor’s Desk' }
 
 async function getSubmissions() {
   try {
@@ -15,65 +14,206 @@ async function getSubmissions() {
   }
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  PENDING:  'bg-amber-500/15 text-amber-400 border-amber-500/25',
-  APPROVED: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
-  REJECTED: 'bg-red-500/15 text-red-400 border-red-500/25',
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: 'var(--red)',
+  APPROVED: 'var(--success)',
+  REJECTED: 'var(--ink-muted)',
 }
 
 export default async function AdminSubmissionsPage() {
   const submissions = await getSubmissions()
+  const pending = submissions.filter((s: any) => s.status === 'PENDING').length
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Submissions</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {submissions.filter((s: any) => s.status === 'PENDING').length} pending review
-        </p>
-      </div>
+    <div style={{ padding: '32px 40px 64px' }}>
+      <header
+        style={{
+          borderTop: '3px double var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '20px 0',
+          marginBottom: 24,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 8,
+          }}
+        >
+          Inbox · {pending} pending
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'var(--fs-name)',
+            color: 'var(--ink)',
+            lineHeight: 1.1,
+          }}
+        >
+          Submissions to the Desk
+        </h1>
+      </header>
 
       {submissions.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <p className="text-4xl mb-3">📭</p>
-          <p className="text-muted-foreground text-sm">No submissions yet</p>
+        <div
+          style={{
+            border: '1px solid var(--ink)',
+            padding: 64,
+            textAlign: 'center',
+            background: 'var(--paper-alt)',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: 'var(--serif)',
+              fontSize: '1.4rem',
+              fontStyle: 'italic',
+              color: 'var(--ink)',
+              marginBottom: 6,
+            }}
+          >
+            No correspondence today.
+          </p>
+          <p
+            style={{
+              fontFamily: 'var(--body)',
+              fontSize: '0.95rem',
+              color: 'var(--ink-light)',
+            }}
+          >
+            New submissions will appear here for review.
+          </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary border-b border-border">
-              <tr>
-                {['Tool', 'URL', 'Submitted By', 'Date', 'Status', 'Actions'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">{h}</th>
+        <div style={{ border: '1px solid var(--ink)', overflow: 'hidden' }}>
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontFamily: 'var(--body)',
+              fontSize: '0.95rem',
+            }}
+          >
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--ink)', background: 'var(--paper-alt)' }}>
+                {['Tool', 'URL', 'From', 'Filed', 'Status', 'Actions'].map((h) => (
+                  <th
+                    key={h}
+                    style={{
+                      padding: '10px 14px',
+                      textAlign: 'left',
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.14em',
+                      color: 'var(--ink-muted)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-card">
+            <tbody>
               {submissions.map((sub: any) => (
-                <tr key={sub.id} className="hover:bg-secondary/50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate">{sub.toolName}</td>
-                  <td className="px-4 py-3">
-                    <a href={sub.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 text-xs transition-colors truncate block max-w-[160px]">
+                <tr key={sub.id} style={{ borderBottom: '1px solid var(--rule)' }}>
+                  <td style={{ padding: '10px 14px' }}>
+                    <span style={{ fontFamily: 'var(--serif)', fontWeight: 700, color: 'var(--ink)' }}>
+                      {sub.toolName}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 14px', maxWidth: 180 }}>
+                    <a
+                      href={sub.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: 'var(--mono)',
+                        fontSize: 'var(--fs-tag)',
+                        color: 'var(--red)',
+                        textDecoration: 'none',
+                        display: 'block',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {sub.websiteUrl.replace(/^https?:\/\//, '')}
                     </a>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{sub.submitter?.email ?? '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">
+                  <td
+                    style={{
+                      padding: '10px 14px',
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      color: 'var(--ink-light)',
+                    }}
+                  >
+                    {sub.submitter?.email ?? '—'}
+                  </td>
+                  <td
+                    style={{
+                      padding: '10px 14px',
+                      fontFamily: 'var(--mono)',
+                      fontSize: 'var(--fs-tag)',
+                      color: 'var(--ink-muted)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {new Date(sub.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[sub.status]}`}>
+                  <td style={{ padding: '10px 14px' }}>
+                    <span
+                      style={{
+                        fontFamily: 'var(--mono)',
+                        fontSize: 'var(--fs-tag)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.14em',
+                        color: STATUS_COLORS[sub.status] ?? 'var(--ink-muted)',
+                        fontWeight: 600,
+                      }}
+                    >
                       {sub.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '10px 14px' }}>
                     {sub.status === 'PENDING' && (
-                      <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
-                          <CheckCircle className="h-3.5 w-3.5" /> Approve
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        <button
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--mono)',
+                            fontSize: 'var(--fs-tag)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.14em',
+                            color: 'var(--success)',
+                            padding: 0,
+                          }}
+                        >
+                          ✓ Approve
                         </button>
-                        <button className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors">
-                          <XCircle className="h-3.5 w-3.5" /> Reject
+                        <button
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--mono)',
+                            fontSize: 'var(--fs-tag)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.14em',
+                            color: 'var(--red)',
+                            padding: 0,
+                          }}
+                        >
+                          ✗ Reject
                         </button>
                       </div>
                     )}

@@ -1,43 +1,88 @@
-import Link from "next/link";
-import Image from "next/image";
+import Link from 'next/link'
 
 interface ProductCardProps {
-  name: string;
-  tagline: string;
-  logoUrl: string;
-  slug: string;
+  name: string
+  tagline: string
+  logoUrl: string
+  slug: string
 }
 
 export function ProductCard({ name, tagline, logoUrl, slug }: ProductCardProps) {
   return (
-    <Link 
+    <Link
       href={`/product/${slug}`}
-      className="group block bg-white rounded-xl border border-slate-200 p-6 transition-all duration-300 hover:shadow-lg hover:border-slate-300"
+      style={{
+        display: 'block',
+        background: 'var(--paper)',
+        border: '1px solid var(--rule)',
+        padding: 20,
+        textDecoration: 'none',
+        transition: 'border-color var(--dur-fast)',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ink)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--rule)' }}
     >
-      <div className="flex flex-col items-center text-center gap-4">
-        <div className="w-20 h-20 relative rounded-lg overflow-hidden border border-slate-100 p-1 bg-white flex items-center justify-center">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            border: '1px solid var(--rule)',
+            background: 'var(--paper)',
+            padding: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           {logoUrl ? (
-            <img 
-              src={logoUrl} 
+            <img
+              src={logoUrl}
               alt={`${name} logo`}
-              className="max-w-full max-h-full object-contain"
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
             />
           ) : (
-            <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-2xl">
-              {name.charAt(0)}
-            </div>
+            <span
+              style={{
+                fontFamily: 'var(--serif)',
+                fontSize: '1.4rem',
+                fontWeight: 700,
+                color: 'var(--ink-muted)',
+              }}
+            >
+              {name.charAt(0).toUpperCase()}
+            </span>
           )}
         </div>
-        
+
         <div>
-          <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors">
+          <h3
+            style={{
+              fontFamily: 'var(--serif)',
+              fontSize: 'var(--fs-card)',
+              fontWeight: 700,
+              color: 'var(--ink)',
+              lineHeight: 1.2,
+            }}
+          >
             {name}
           </h3>
-          <p className="text-sm text-slate-500 line-clamp-2 mt-1">
+          <p
+            style={{
+              fontFamily: 'var(--body)',
+              fontSize: 'var(--fs-body)',
+              color: 'var(--ink-muted)',
+              marginTop: 6,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
             {tagline}
           </p>
         </div>
       </div>
     </Link>
-  );
+  )
 }

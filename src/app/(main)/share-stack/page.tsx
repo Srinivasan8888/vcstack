@@ -1,40 +1,94 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Share Your Stack — VC Stack',
+  title: 'Share Your Stack — IndianVCs',
   description:
     'Share the tools your VC firm uses and help the community discover great software.',
 }
 
 export default function ShareStackPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
-        <Link href="/" className="hover:text-foreground transition-colors">
-          Home
-        </Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground">Share Your Stack</span>
-      </nav>
+    <div className="page" style={{ padding: '24px 24px 64px', maxWidth: 720 }}>
+      <div className="breadcrumb">
+        <Link href="/">Home</Link>
+        <span className="sep">·</span>
+        <span style={{ color: 'var(--ink)' }}>Share Your Stack</span>
+      </div>
 
-      <div className="max-w-xl mx-auto text-center py-24">
-        <h1 className="text-3xl font-bold text-foreground mb-4">
+      <header
+        style={{
+          borderTop: '2px solid var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '24px 0',
+          marginBottom: 32,
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 10,
+          }}
+        >
+          Dear Editor
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'var(--fs-name)',
+            color: 'var(--ink)',
+            lineHeight: 1.05,
+          }}
+        >
           Share Your Stack
         </h1>
-        <p className="text-muted-foreground leading-relaxed mb-8">
-          The community would love to see and hear about the tools you are
-          using in your venture firm. Share your stack and help others find
-          the right tools.
-        </p>
-        <a
-          href="mailto:hello@vcstack.io?subject=Sharing our VC Stack"
-          className="btn-primary"
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1.1rem',
+            color: 'var(--ink-light)',
+            marginTop: 14,
+            fontStyle: 'italic',
+            maxWidth: 560,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
         >
-          Get in touch
+          The community would love to hear which tools your firm actually uses — the CRM,
+          the data-sourcing rig, the analytics suite, the whiteboards you can’t quit.
+        </p>
+      </header>
+
+      <div style={{ textAlign: 'center' }}>
+        <a
+          href="mailto:desk@indianvcs.com?subject=Sharing our stack"
+          className="btn btn--primary"
+        >
+          Write to the desk →
         </a>
+        <p
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            color: 'var(--ink-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            marginTop: 16,
+          }}
+        >
+          Or file a submission via the form below
+        </p>
+        <div style={{ marginTop: 12 }}>
+          <Link href="/submit-product" className="btn btn--ghost">
+            Submit a product
+          </Link>
+        </div>
       </div>
     </div>
   )

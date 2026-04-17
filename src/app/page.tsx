@@ -1,363 +1,352 @@
 import Link from 'next/link'
-import { ArrowRight, Star, Monitor, Share2 } from 'lucide-react'
 import PageLayout from '@/components/layout/PageLayout'
 import CategoryCard from '@/components/cards/CategoryCard'
-import SearchBox from '@/components/ui/SearchBox'
-import LogoCard from '@/components/ui/LogoCard'
 import NewsletterForm from '@/components/ui/NewsletterForm'
-import { getCategories, getFeaturedTools, getCategoryPreviewTools } from '@/lib/data'
+import ToolsDirectory from '@/app/(main)/tools/ToolsDirectory'
+import FeaturedToolsCarousel from '@/components/ui/FeaturedToolsCarousel'
+import { getCategories, getFeaturedTools, getCategoryPreviewTools, getAllTools } from '@/lib/data'
 import type { Tool } from '@/lib/types'
 
 export const revalidate = 3600
 
-/* ─── "Our Favorites" card ───────────────────────────────────────────────── */
-function FavoriteCard({ tool, categoryLabel }: { tool: Tool; categoryLabel: string }) {
-  const hue = (tool.name.charCodeAt(0) * 53 + (tool.name.charCodeAt(1) || 0) * 37) % 360
-  const initials = tool.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-
+/* ─── Lead story — one featured tool, front-page hero ────────────────────── */
+function LeadStory({ tool }: { tool: Tool }) {
   return (
-    <div className="flex flex-col bg-white rounded-2xl border border-border overflow-hidden">
-      {/* Category badge */}
-      <div className="px-5 pt-5 pb-3">
-        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-          <ArrowRight className="h-3 w-3" />
-          {categoryLabel}
-        </span>
-      </div>
-
-      {/* Screenshot area */}
-      <div className="mx-5 rounded-xl overflow-hidden border border-border h-48 relative bg-secondary flex-shrink-0">
-        {tool.screenshotUrl ? (
-          <>
-            <img
-              src={tool.screenshotUrl}
-              alt={`${tool.name} screenshot`}
-              className="h-full w-full object-cover object-top"
-            />
-            {/* Logo pill overlay */}
-            <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 backdrop-blur rounded-lg px-2 py-1 shadow-sm">
-              {tool.logoUrl ? (
-                <img src={tool.logoUrl} alt={tool.name} className="h-5 w-auto max-w-20 object-contain shrink-0" />
-              ) : (
-                <>
-                  <div
-                    className="h-5 w-5 rounded-md flex items-center justify-center text-[9px] font-bold text-white shrink-0"
-                    style={{ background: `oklch(0.45 0.20 ${hue})` }}
-                  >
-                    {initials}
-                  </div>
-                  <span className="text-[10px] font-semibold text-foreground">{tool.name}</span>
-                </>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="h-full w-full flex flex-col" style={{ background: `oklch(0.93 0.04 ${hue})` }}>
-            {/* Browser chrome */}
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-white/40 border-b border-black/8">
-              <span className="h-2 w-2 rounded-full bg-red-400" />
-              <span className="h-2 w-2 rounded-full bg-yellow-400" />
-              <span className="h-2 w-2 rounded-full bg-green-400" />
-              <div className="ml-2 flex-1 h-3 rounded bg-white/50" />
-            </div>
-            {/* Mock UI */}
-            <div className="flex-1 p-3 flex flex-col gap-2 relative overflow-hidden">
-              <div className="h-2.5 rounded-full bg-white/50 w-3/5" />
-              <div className="h-2 rounded-full bg-white/35 w-2/5" />
-              <div className="mt-1 grid grid-cols-2 gap-2 flex-1">
-                <div className="rounded-lg bg-white/30" />
-                <div className="rounded-lg flex flex-col gap-1.5 p-2">
-                  <div className="h-1.5 rounded bg-white/40 w-full" />
-                  <div className="h-1.5 rounded bg-white/30 w-4/5" />
-                  <div className="h-1.5 rounded bg-white/25 w-3/5" />
-                </div>
-              </div>
-              {/* Tool logo pill at bottom of image */}
-              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 backdrop-blur rounded-lg px-2 py-1 shadow-sm">
-                {tool.logoUrl ? (
-                  <img src={tool.logoUrl} alt={tool.name} className="h-5 w-auto max-w-20 object-contain shrink-0" />
-                ) : (
-                  <>
-                    <div
-                      className="h-5 w-5 rounded-md flex items-center justify-center text-[9px] font-bold text-white shrink-0"
-                      style={{ background: `oklch(0.45 0.20 ${hue})` }}
-                    >
-                      {initials}
-                    </div>
-                    <span className="text-[10px] font-semibold text-foreground">{tool.name}</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Tool info */}
-      <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
-        <h3 className="text-lg font-bold text-foreground leading-snug mb-2">
-          {tool.shortDesc ?? tool.description.slice(0, 60)}
-        </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-5">
-          {tool.description}
+    <article
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: 24,
+        paddingBottom: 32,
+        borderBottom: '3px double var(--ink)',
+      }}
+    >
+      <div>
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            color: 'var(--red)',
+            marginBottom: 12,
+          }}
+        >
+          Lead Story · Tool of the Week
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'clamp(2.4rem, 5vw, 3.6rem)',
+            lineHeight: 1.05,
+            color: 'var(--ink)',
+            marginBottom: 16,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {tool.name}: <em style={{ fontStyle: 'italic', fontWeight: 400 }}>{tool.shortDesc ?? tool.description.slice(0, 80)}</em>
+        </h2>
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1.05rem',
+            lineHeight: 1.55,
+            color: 'var(--ink-light)',
+            marginBottom: 20,
+            maxWidth: 720,
+          }}
+        >
+          {tool.description.slice(0, 360)}{tool.description.length > 360 ? '…' : ''}
         </p>
-        <div className="mt-auto">
-          <Link
-            href={`/product/${tool.slug}`}
-            className="inline-flex items-center justify-center rounded-lg bg-foreground px-5 py-2.5 text-sm font-semibold text-white hover:opacity-85 transition-opacity"
-          >
-            Learn more
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link href={`/product/${tool.slug}`} className="btn btn--primary">
+            Read the full report →
           </Link>
+          {tool.category && (
+            <Link href={`/category/${tool.category.slug}`} className="btn btn--ghost">
+              More in {tool.category.name}
+            </Link>
+          )}
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 
-/* Category → label mapping (matches real vcstack.io slugs) */
-const CATEGORY_LABELS: Record<string, string> = {
-  'deal-sourcing':                       '🔎 Data & Deal Sourcing',
-  'crm':                                 '🤝 CRM',
-  'portfolio-management':                '📈 Portfolio Management',
-  'fund-admin-software':                 '🏦 Fund Admin & Reporting',
-  'data':                                '📊 Data',
-  'captable-equity-management':          '📑 Captable / Equity Management',
-  'lp-tools':                            '📋 LP Tools',
-  'data-room':                           '🔒 Data Room',
-  'research':                            '📑 Research',
-  'video-conferencing':                  '💬 Video Conferencing',
-  'fund-modeling-portfolio-forecasting': '📉 Fund Modeling & Forecasting',
-  'email':                               '📧 Email',
-  'platform':                            '🏗️ Platform',
-  'esg':                                 '🌱 ESG',
-  'hiring-payroll':                      '👥 Hiring & Payroll',
-  'infrastructure':                      '⚙️ Infrastructure',
-  'insurance':                           '🛡️ Insurance',
-  'job-board-talent-pool':               '💼 Job Board & Talent Pool',
-  'liquidity-instruments':               '💧 Liquidity Instruments',
-  'newsletter-tools':                    '📰 Newsletter Tools',
-  'news-resources':                      '📡 News & Resources',
-  'community':                           '🏘️ Community',
-  'calendar':                            '📅 Calendar',
-  'project-management':                  '📌 Project Management',
-  'other-tools':                         '🔧 Other Tools',
-  'website':                             '🌐 Website',
+/* ─── Editor's pick — compact item for sidebar column ────────────────────── */
+function PickItem({ tool, n }: { tool: Tool; n: number }) {
+  return (
+    <article
+      style={{
+        paddingBottom: 16,
+        marginBottom: 16,
+        borderBottom: '1px solid var(--rule)',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'var(--mono)',
+          fontSize: 'var(--fs-tag)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--ink-muted)',
+          marginBottom: 4,
+        }}
+      >
+        No. {String(n).padStart(2, '0')} · {tool.category?.name ?? 'Tool'}
+      </div>
+      <Link
+        href={`/product/${tool.slug}`}
+        style={{
+          fontFamily: 'var(--serif)',
+          fontWeight: 700,
+          fontSize: 'var(--fs-card)',
+          lineHeight: 1.25,
+          color: 'var(--ink)',
+          textDecoration: 'none',
+          display: 'block',
+          marginBottom: 6,
+        }}
+      >
+        {tool.name}
+      </Link>
+      <p
+        style={{
+          fontFamily: 'var(--body)',
+          fontSize: 'var(--fs-body)',
+          color: 'var(--ink-light)',
+          lineHeight: 1.5,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {tool.shortDesc ?? tool.description.slice(0, 140)}
+      </p>
+    </article>
+  )
 }
 
-/* FAQ data */
-const FAQ = [
-  {
-    q: 'Why does VC Stack exist?',
-    a: 'We spent a lot of time looking at the stacks different VCs use and have seen the challenges from the inside. Hundreds of tools for different use-cases, geographies, non-transparent pricing, and no reviews at all. So we decided to change that and came up with VC Stack to support investors with everything besides the real investing.',
-  },
-  {
-    q: 'Who curated the tools?',
-    a: 'We collected all tools on our website from different sources and articles around the web. Furthermore we asked our VC friends to share their current stack.',
-  },
-  {
-    q: 'I think a tool or category is missing?',
-    a: '100%. VC Stack is and always will be work in progress. You can submit a product or new category here. We will regularly update the database to stay up to date and empower everyone to pick the tools they like.',
-  },
-  {
-    q: 'Who is behind VC Stack?',
-    a: 'VC Stack was founded as a community resource for the venture capital ecosystem. It has grown into a comprehensive directory serving 500+ VC firms worldwide, helping investors discover and evaluate tools for every part of their workflow.',
-  },
-  {
-    q: 'How can I help?',
-    a: 'The easiest way: Tell us which tools you like and why they solve a problem for you or share the current stack at your firm. Reach out to us via email or submit a tool through our submission form.',
-  },
-]
-
 export default async function HomePage() {
-  const [categories, featuredTools, previewToolsMap] = await Promise.all([
+  const [categories, featuredTools, previewToolsMap, allTools] = await Promise.all([
     getCategories(),
-    getFeaturedTools(12),
+    getFeaturedTools(20),
     getCategoryPreviewTools(),
+    getAllTools(),
   ])
 
-  const favorites = featuredTools.slice(0, 6)
+  const [lead, ...picks] = featuredTools
+  const sidePicks = picks.slice(0, 5)
+  const carouselTools = picks.slice(5)
 
   return (
     <PageLayout>
-
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden flex items-center justify-center px-4"
-        style={{
-          minHeight: '540px',
-          paddingTop: '5rem',
-          paddingBottom: '5rem',
-          background: 'linear-gradient(180deg, #f0eef9 0%, #e8e6f3 40%, #dfdcee 100%)',
-        }}
-      >
-        {/* Floating tool logo cards */}
-        <div className="pointer-events-none absolute inset-0">
-          {/* Left column */}
-          <LogoCard name="PitchBook"   logoUrl="https://www.google.com/s2/favicons?domain=pitchbook.com&sz=128"   size="md" delay="0.0s" duration="3.8s" style={{ top: '14%', left: '4%' }} />
-          <LogoCard name="Crunchbase"  logoUrl="https://www.google.com/s2/favicons?domain=crunchbase.com&sz=128"  size="sm" delay="1.6s" duration="4.2s" style={{ top: '48%', left: '6%' }} />
-          <LogoCard name="Slack"       logoUrl="https://www.google.com/s2/favicons?domain=slack.com&sz=128"       size="md" delay="2.4s" duration="3.5s" style={{ top: '76%', left: '5%' }} />
-          {/* Left-center */}
-          <LogoCard name="Harmonic"    logoUrl="https://www.google.com/s2/favicons?domain=harmonic.ai&sz=128"     size="sm" delay="0.5s" duration="4.0s" style={{ top: '8%',  left: '17%' }} />
-          <LogoCard name="CB Insights" logoUrl="https://www.google.com/s2/favicons?domain=cbinsights.com&sz=128"  size="md" delay="2.0s" duration="3.6s" style={{ top: '36%', left: '15%' }} />
-          <LogoCard name="Airtable"    logoUrl="https://www.google.com/s2/favicons?domain=airtable.com&sz=128"    size="sm" delay="2.8s" duration="4.4s" style={{ top: '62%', left: '19%' }} />
-          <LogoCard name="Notion"      logoUrl="https://www.google.com/s2/favicons?domain=notion.so&sz=128"       size="md" delay="1.2s" duration="3.9s" style={{ top: '86%', left: '14%' }} />
-          {/* Right-center */}
-          <LogoCard name="Webflow"     logoUrl="https://www.google.com/s2/favicons?domain=webflow.com&sz=128"     size="md" delay="0.7s" duration="3.7s" style={{ top: '8%',  right: '17%' }} />
-          <LogoCard name="Linear"      logoUrl="https://www.google.com/s2/favicons?domain=linear.app&sz=128"      size="sm" delay="2.2s" duration="4.1s" style={{ top: '36%', right: '15%' }} />
-          <LogoCard name="Attio"       logoUrl="https://www.google.com/s2/favicons?domain=attio.com&sz=128"       size="md" delay="1.4s" duration="3.3s" style={{ top: '62%', right: '19%' }} />
-          <LogoCard name="Edda"        logoUrl="https://www.google.com/s2/favicons?domain=edda.co&sz=128"         size="sm" delay="3.0s" duration="4.5s" style={{ top: '86%', right: '14%' }} />
-          {/* Right column */}
-          <LogoCard name="Salesforce"  logoUrl="https://www.google.com/s2/favicons?domain=salesforce.com&sz=128"  size="sm" delay="1.8s" duration="3.6s" style={{ top: '14%', right: '4%' }} />
-          <LogoCard name="Affinity"    logoUrl="https://www.google.com/s2/favicons?domain=affinity.co&sz=128"     size="md" delay="0.3s" duration="4.3s" style={{ top: '48%', right: '6%' }} />
-          <LogoCard name="Visible"     logoUrl="https://www.google.com/s2/favicons?domain=visible.vc&sz=128"      size="sm" delay="2.6s" duration="3.4s" style={{ top: '76%', right: '5%' }} />
+      {/* ── Kicker ─────────────────────────────────────────────── */}
+      <div className="page" style={{ padding: '20px 24px 0' }}>
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--ink-muted)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            paddingBottom: 8,
+            borderBottom: '1px solid var(--rule)',
+            flexWrap: 'wrap',
+            gap: 8,
+          }}
+        >
+          <span>The Front Page</span>
+          <span>514 tools · 26 categories · 5 firms</span>
         </div>
+      </div>
 
-        {/* Central content */}
-        <div className="relative z-10 mx-auto text-center" style={{ maxWidth: 540 }}>
-          <h1
-            className="font-extrabold tracking-tight leading-[1.12] mb-5"
-            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', color: '#1a1a2e' }}
-          >
-            Find your VC software stack
-          </h1>
+      {/* ── Lead story + Editor's picks split ───────────────────── */}
+      <section className="page" style={{ padding: '32px 24px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: 32,
+          }}
+          className="md:grid-cols-[1.6fr_1fr]"
+        >
+          {/* Lead column */}
+          <div>
+            {lead ? (
+              <LeadStory tool={lead} />
+            ) : (
+              <div className="empty">No lead story yet. Check back soon.</div>
+            )}
 
-          <p className="text-base leading-relaxed mb-8 mx-auto" style={{ color: '#6b6b8a', maxWidth: 440 }}>
-            The world&apos;s largest directory of tools and resources for
-            venture capital and angel investors
-          </p>
+          </div>
 
-          <SearchBox placeholder="Search for product or category" />
+          {/* Sidebar picks */}
+          <aside>
+            <div className="section-header">Editor’s Picks</div>
+            {sidePicks.length > 0 ? (
+              sidePicks.map((tool, i) => (
+                <PickItem key={tool.id} tool={tool} n={i + 2} />
+              ))
+            ) : (
+              <p style={{ color: 'var(--ink-muted)' }}>No picks yet.</p>
+            )}
+            <Link href="/stacks" className="btn btn--ghost w-full justify-center">
+              See all stacks →
+            </Link>
+          </aside>
         </div>
       </section>
 
-      {/* ── Our Favorites ─────────────────────────────────────────────────── */}
-      {favorites.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Our favorites</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {favorites.map((tool) => {
-              const catLabel =
-                (tool.category?.slug && CATEGORY_LABELS[tool.category.slug]) ??
-                tool.category?.name ?? 'Tool'
-              return <FavoriteCard key={tool.id} tool={tool} categoryLabel={catLabel} />
-            })}
+      {/* ── Tool Directory (OpenVC-style) ───────────────────────── */}
+      <section className="page" style={{ padding: '0 24px 48px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            borderTop: '2px solid var(--ink)',
+            paddingTop: 20,
+            marginBottom: 20,
+            gap: 16,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div>
+            <h2
+              style={{
+                fontFamily: 'var(--serif)',
+                fontWeight: 900,
+                fontSize: 'var(--fs-hero)',
+                color: 'var(--ink)',
+                letterSpacing: '0.01em',
+                textTransform: 'uppercase',
+              }}
+            >
+              The Tool Directory
+            </h2>
+            <p
+              style={{
+                fontFamily: 'var(--body)',
+                fontSize: 'var(--fs-body)',
+                color: 'var(--ink-muted)',
+                fontStyle: 'italic',
+                marginTop: 4,
+              }}
+            >
+              Every tool on file — search, filter by section or pricing, open the full entry.
+            </p>
+          </div>
+          <Link href="/tools" className="btn btn--ghost">Open full directory →</Link>
+        </div>
+        <ToolsDirectory tools={allTools} categories={categories} preview previewLimit={6} />
+      </section>
+
+      {/* ── Sections (categories) ───────────────────────────────── */}
+      <section className="page" style={{ padding: '12px 24px 48px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            borderTop: '2px solid var(--ink)',
+            paddingTop: 20,
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: 'var(--serif)',
+              fontWeight: 900,
+              fontSize: 'var(--fs-hero)',
+              color: 'var(--ink)',
+              letterSpacing: '0.01em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Sections of the Paper
+          </h2>
+          <Link href="/all-categories" className="btn btn--ghost">
+            All categories →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0" style={{ gap: 0 }}>
+          {categories.map((cat, i) => (
+            <div key={cat.id} style={{ marginLeft: -1, marginTop: -1 }}>
+              <CategoryCard
+                category={cat}
+                variant="default"
+                previewTools={previewToolsMap[cat.slug] ?? []}
+                index={i}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Featured tools carousel ─────────────────────────────── */}
+      {carouselTools.length > 0 && (
+        <section className="page" style={{ padding: '0 24px 48px' }}>
+          <div style={{ borderTop: '2px solid var(--ink)', paddingTop: 20 }}>
+            <FeaturedToolsCarousel tools={carouselTools} />
           </div>
         </section>
       )}
 
-      {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Categories</h2>
-          <Link
-            href="/all-categories"
-            className="text-sm text-muted-foreground border border-border rounded-full px-3 py-1 hover:bg-card hover:text-foreground transition-colors"
-          >
-            All categories
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((cat) => (
-            <CategoryCard
-              key={cat.id}
-              category={cat}
-              variant="default"
-              previewTools={previewToolsMap[cat.slug] ?? []}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* ── FAQ ───────────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
-          {/* Left */}
+      {/* ── Newsletter / The Dispatch ───────────────────────────── */}
+      <section className="page" style={{ padding: '0 24px 60px' }}>
+        <div
+          style={{
+            border: '2px solid var(--ink)',
+            padding: 32,
+            display: 'grid',
+            gap: 24,
+          }}
+          className="md:grid-cols-[1fr_auto]"
+        >
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">
-              Frequently asked<br />questions
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Just a few words on why we created this website and who built it.
-            </p>
-          </div>
-          {/* Right */}
-          <div className="divide-y divide-border">
-            {FAQ.map(({ q, a }) => (
-              <div key={q} className="py-5 first:pt-0">
-                <h3 className="text-sm font-semibold text-foreground mb-1.5">{q}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Support the community ─────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Support the community</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              icon: Star,
-              title: 'Write Review',
-              desc: 'How do you like the products you are working with? Answer a few questions to help the VC Stack community.',
-              href: '/review',
-              linkLabel: 'Write Review',
-            },
-            {
-              icon: Monitor,
-              title: 'Submit Product',
-              desc: "You think we are missing a product that you or someone else uses? Just give us a hint and we will add it.",
-              href: '/submit-product',
-              linkLabel: 'Submit Product',
-            },
-            {
-              icon: Share2,
-              title: 'Share your stack',
-              desc: 'The community would love to see and hear about the tools you are using in your venture firm.',
-              href: '/share-stack',
-              linkLabel: 'Share Stack',
-            },
-          ].map(({ icon: Icon, title, desc, href, linkLabel }) => (
-            <div key={title} className="bg-card rounded-2xl border border-border p-6">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-secondary">
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">{title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-4">{desc}</p>
-              <Link href={href} className="text-sm font-medium text-brand hover:underline">
-                {linkLabel}
-              </Link>
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-tag)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.2em',
+                color: 'var(--red)',
+                marginBottom: 8,
+              }}
+            >
+              The Dispatch · Bi-weekly edition
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Newsletter ────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="bg-card rounded-2xl border border-border p-8 flex flex-col sm:flex-row items-center gap-6 justify-between">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-foreground mb-1">VC Stack Newsletter</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-              Subscribe to our bi-weekly newsletter to receive a deep dive, reads-of-the-week, resources and tools.
+            <h3
+              style={{
+                fontFamily: 'var(--serif)',
+                fontWeight: 900,
+                fontSize: '1.8rem',
+                color: 'var(--ink)',
+                marginBottom: 8,
+              }}
+            >
+              A reading list for the venture desk.
+            </h3>
+            <p
+              style={{
+                fontFamily: 'var(--body)',
+                fontSize: 'var(--fs-body)',
+                color: 'var(--ink-light)',
+                maxWidth: 520,
+              }}
+            >
+              One well-written edition every other Monday. Deep dives, new tools, reads of
+              the week, and commentary from operators and GPs.
             </p>
             <NewsletterForm />
           </div>
-          {/* Decorative avatars */}
-          <div className="flex -space-x-3 shrink-0">
-            {['#FF6B35','#6C5CE7','#00A878','#0073E6'].map((c, i) => (
-              <div
-                key={i}
-                className="h-10 w-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-sm"
-                style={{ background: c }}
-              >
-                {['H','A','V','C'][i]}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
-
     </PageLayout>
   )
 }

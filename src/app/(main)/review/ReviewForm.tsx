@@ -1,7 +1,6 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { Star } from 'lucide-react'
 import { submitReview, type SubmitReviewState } from '@/server/actions/submissions'
 
 const initial: SubmitReviewState = { success: false, message: '' }
@@ -13,54 +12,119 @@ export default function ReviewForm({ defaultToolSlug }: { defaultToolSlug?: stri
 
   if (state.success) {
     return (
-      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center">
-        <p className="text-3xl mb-3">🙏</p>
-        <h2 className="text-lg font-semibold text-foreground mb-2">Review submitted!</h2>
-        <p className="text-sm text-muted-foreground">{state.message}</p>
+      <div
+        style={{
+          border: '2px solid var(--ink)',
+          padding: 40,
+          textAlign: 'center',
+          background: 'var(--paper-alt)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--success)',
+            marginBottom: 14,
+          }}
+        >
+          Received · Queued for Moderation
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: '1.8rem',
+            color: 'var(--ink)',
+            marginBottom: 12,
+            lineHeight: 1.1,
+          }}
+        >
+          Thank you for the letter.
+        </h2>
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1.05rem',
+            fontStyle: 'italic',
+            color: 'var(--ink-light)',
+          }}
+        >
+          {state.message}
+        </p>
       </div>
     )
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {state.message && !state.success && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          style={{
+            border: '1px solid var(--red)',
+            background: 'rgba(192, 57, 43, 0.06)',
+            padding: '12px 16px',
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            color: 'var(--red)',
+          }}
+        >
           {state.message}
         </div>
       )}
 
-      {/* Tool slug (hidden or text) */}
       {defaultToolSlug ? (
         <input type="hidden" name="toolSlug" value={defaultToolSlug} />
       ) : (
         <Field label="Tool Slug" name="toolSlug" required error={state.errors?.toolSlug?.[0]}>
-          <input type="text" name="toolSlug" placeholder="e.g. affinity" required className={inputCls} />
+          <input type="text" name="toolSlug" placeholder="e.g. affinity" required style={inputStyle} />
         </Field>
       )}
 
-      {/* Star rating */}
       <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Rating <span className="text-destructive">*</span>
+        <label
+          style={{
+            display: 'block',
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            color: 'var(--ink)',
+            marginBottom: 10,
+            fontWeight: 600,
+          }}
+        >
+          Rating <span style={{ color: 'var(--red)', marginLeft: 4 }}>*</span>
         </label>
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setRating(n)}
-              onMouseEnter={() => setHovered(n)}
-              onMouseLeave={() => setHovered(0)}
-            >
-              <Star
-                className={`h-7 w-7 transition-colors ${
-                  n <= (hovered || rating)
-                    ? 'fill-amber-400 text-amber-400'
-                    : 'text-muted-foreground'
-                }`}
-              />
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[1, 2, 3, 4, 5].map((n) => {
+            const active = n <= (hovered || rating)
+            return (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setRating(n)}
+                onMouseEnter={() => setHovered(n)}
+                onMouseLeave={() => setHovered(0)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: '1.8rem',
+                  color: active ? 'var(--red)' : 'var(--rule-heavy)',
+                  lineHeight: 1,
+                }}
+                aria-label={`${n} stars`}
+              >
+                ★
+              </button>
+            )
+          })}
         </div>
         <input type="hidden" name="rating" value={rating} />
       </div>
@@ -68,32 +132,41 @@ export default function ReviewForm({ defaultToolSlug }: { defaultToolSlug?: stri
       <Field label="Your Review" name="content" required error={state.errors?.content?.[0]}>
         <textarea
           name="content"
-          rows={5}
+          rows={6}
           required
           placeholder="Share your experience — what you liked, what could be improved…"
-          className={`${inputCls} resize-none`}
+          style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--body)' }}
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Field label="Your Name" name="reviewerName" required error={state.errors?.reviewerName?.[0]}>
-          <input type="text" name="reviewerName" placeholder="Jane Smith" required className={inputCls} />
+          <input type="text" name="reviewerName" placeholder="Jane Smith" required style={inputStyle} />
         </Field>
         <Field label="Your Email" name="reviewerEmail" required error={state.errors?.reviewerEmail?.[0]}>
-          <input type="email" name="reviewerEmail" placeholder="you@example.com" required className={inputCls} />
+          <input type="email" name="reviewerEmail" placeholder="you@example.com" required style={inputStyle} />
         </Field>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Your email won&apos;t be displayed publicly. Reviews are moderated before publication.
+      <p
+        style={{
+          fontFamily: 'var(--mono)',
+          fontSize: 'var(--fs-tag)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--ink-muted)',
+        }}
+      >
+        Email held in confidence · Letters moderated before publication
       </p>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className="btn btn--primary"
+        style={{ marginTop: 4 }}
       >
-        {pending ? 'Submitting…' : 'Submit Review'}
+        {pending ? 'Sending…' : 'Send Letter →'}
       </button>
     </form>
   )
@@ -106,14 +179,49 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-foreground mb-1.5">
-        {label}{required && <span className="ml-0.5 text-destructive">*</span>}
+      <label
+        htmlFor={name}
+        style={{
+          display: 'block',
+          fontFamily: 'var(--mono)',
+          fontSize: 'var(--fs-tag)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--ink)',
+          marginBottom: 8,
+          fontWeight: 600,
+        }}
+      >
+        {label}
+        {required && <span style={{ color: 'var(--red)', marginLeft: 4 }}>*</span>}
       </label>
       {children}
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {error && (
+        <p
+          style={{
+            marginTop: 6,
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            color: 'var(--red)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+          }}
+        >
+          {error}
+        </p>
+      )}
     </div>
   )
 }
 
-const inputCls =
-  'w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all'
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'var(--paper)',
+  border: '1px solid var(--ink)',
+  padding: '10px 12px',
+  fontFamily: 'var(--body)',
+  fontSize: '1rem',
+  color: 'var(--ink)',
+  borderRadius: 0,
+  outline: 'none',
+}

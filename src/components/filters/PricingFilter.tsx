@@ -18,10 +18,8 @@ interface PricingFilterProps {
 export default function PricingFilter({ currentPricing, basePath }: PricingFilterProps) {
   return (
     <div>
-      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-        Pricing
-      </h3>
-      <div className="flex flex-col gap-1">
+      <div className="section-header">Pricing</div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {PRICING_OPTIONS.map(({ value, label }) => {
           const isActive = (currentPricing ?? '') === value
           const href = value ? `${basePath}?pricing=${value}` : basePath
@@ -29,13 +27,19 @@ export default function PricingFilter({ currentPricing, basePath }: PricingFilte
             <Link
               key={value}
               href={href}
-              className={`rounded-md px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-              }`}
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-btn)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                padding: '8px 0',
+                borderBottom: '1px solid var(--rule)',
+                color: isActive ? 'var(--red)' : 'var(--ink-light)',
+                textDecoration: 'none',
+                fontWeight: isActive ? 700 : 500,
+              }}
             >
-              {label}
+              {isActive ? '▸ ' : '  '}{label}
             </Link>
           )
         })}

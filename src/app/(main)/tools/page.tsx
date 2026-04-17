@@ -1,26 +1,31 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getAllTools, getCategories } from '@/lib/data'
+import ToolsDirectory from './ToolsDirectory'
 
 export const metadata: Metadata = {
-  title: 'Opinion — IndianVCs',
-  description: 'Insights, guides and news for the venture capital community.',
+  title: 'The Tool Directory — IndianVCs',
+  description:
+    'Search, filter, and browse every tool in the IndianVCs tech stack — by section, pricing, or keyword.',
 }
 
-export default function BlogPage() {
+export default async function ToolsPage() {
+  const [tools, categories] = await Promise.all([getAllTools(), getCategories()])
+
   return (
     <div className="page" style={{ padding: '24px 24px 64px' }}>
       <div className="breadcrumb">
         <Link href="/">Home</Link>
         <span className="sep">·</span>
-        <span style={{ color: 'var(--ink)' }}>Opinion</span>
+        <span style={{ color: 'var(--ink)' }}>Tool Directory</span>
       </div>
 
       <header
         style={{
-          borderTop: '2px solid var(--ink)',
+          borderTop: '3px double var(--ink)',
           borderBottom: '1px solid var(--ink)',
           padding: '20px 0',
-          marginBottom: 28,
+          marginBottom: 24,
         }}
       >
         <div
@@ -33,7 +38,7 @@ export default function BlogPage() {
             marginBottom: 8,
           }}
         >
-          Op-Ed Desk
+          Directory · {tools.length} tools on file
         </div>
         <h1
           style={{
@@ -44,32 +49,24 @@ export default function BlogPage() {
             lineHeight: 1.1,
           }}
         >
-          Opinion
+          The Tool Directory
         </h1>
-      </header>
-
-      <div className="empty" style={{ padding: 64 }}>
         <p
           style={{
-            fontFamily: 'var(--serif)',
-            fontSize: '1.4rem',
-            color: 'var(--ink)',
+            fontFamily: 'var(--body)',
+            fontSize: '1.05rem',
+            color: 'var(--ink-light)',
+            marginTop: 10,
+            maxWidth: 720,
             fontStyle: 'italic',
-            marginBottom: 10,
           }}
         >
-          The column goes to press shortly.
+          Every tool in the IndianVCs tech stack, in one searchable list.
+          Filter by section, pricing, or keyword — then click through for the full entry.
         </p>
-        <p style={{ fontSize: 'var(--fs-body)' }}>
-          Insights, guides, and commentary for the venture capital community.
-          Subscribe to The Dispatch to be notified when it runs.
-        </p>
-        <div style={{ marginTop: 20 }}>
-          <Link href="/newsletter" className="btn btn--primary">
-            Subscribe to The Dispatch
-          </Link>
-        </div>
-      </div>
+      </header>
+
+      <ToolsDirectory tools={tools} categories={categories} />
     </div>
   )
 }

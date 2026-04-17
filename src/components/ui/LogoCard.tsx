@@ -8,47 +8,37 @@ interface LogoCardProps {
   logoUrl?: string | null
   size?: 'sm' | 'md' | 'lg'
   style?: CSSProperties
-  delay?: string   // e.g. "0.5s"
-  duration?: string // e.g. "3.2s"
 }
 
+/**
+ * Broadsheet-style logo badge — a tight square card with a hairline rule,
+ * on the paper palette. No rounded corners, no shadows, no floating animation.
+ */
 export default function LogoCard({
   name,
   logoUrl,
   size = 'md',
   style,
-  delay = '0s',
-  duration = '3.5s',
 }: LogoCardProps) {
   const [imgFailed, setImgFailed] = useState(false)
 
-  const outer =
-    size === 'lg' ? 'h-[60px] w-[60px]' :
-    size === 'sm' ? 'h-[38px] w-[38px]' :
-                    'h-[48px] w-[48px]'
-
-  const inner =
-    size === 'lg' ? 'h-8 w-8 text-sm' :
-    size === 'sm' ? 'h-5 w-5 text-[9px]' :
-                    'h-6 w-6 text-[10px]'
-
-  const imgSize =
-    size === 'lg' ? 'h-8 w-8' :
-    size === 'sm' ? 'h-5 w-5' :
-                    'h-6 w-6'
-
+  const dim = size === 'lg' ? 64 : size === 'sm' ? 36 : 48
   const initials = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-  const hue = (name.charCodeAt(0) * 53 + (name.charCodeAt(1) ?? 0) * 37) % 360
 
   const showImage = !!logoUrl && !imgFailed
 
   return (
     <div
-      className={`absolute ${outer} rounded-2xl bg-white flex items-center justify-center overflow-hidden`}
       style={{
-        boxShadow: '0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)',
-        animation: `float ${duration} ease-in-out infinite`,
-        animationDelay: delay,
+        width: dim,
+        height: dim,
+        background: 'var(--paper)',
+        border: '1px solid var(--rule)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: size === 'sm' ? 4 : 6,
+        flexShrink: 0,
         ...style,
       }}
     >
@@ -56,16 +46,21 @@ export default function LogoCard({
         <img
           src={logoUrl!}
           alt={name}
-          className={`${imgSize} object-contain`}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           onError={() => setImgFailed(true)}
         />
       ) : (
-        <div
-          className={`${inner} rounded-xl flex items-center justify-center font-bold text-white`}
-          style={{ background: `oklch(0.52 0.18 ${hue})` }}
+        <span
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 700,
+            fontSize: dim * 0.32,
+            color: 'var(--ink)',
+            letterSpacing: '0.02em',
+          }}
         >
           {initials}
-        </div>
+        </span>
       )}
     </div>
   )

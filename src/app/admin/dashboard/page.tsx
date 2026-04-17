@@ -1,59 +1,180 @@
 import type { Metadata } from 'next'
-import { Layers, FolderOpen, ClipboardList, Star } from 'lucide-react'
+import Link from 'next/link'
 import { getSiteStats } from '@/lib/data'
 
-export const metadata: Metadata = { title: 'Dashboard' }
+export const metadata: Metadata = { title: 'Editor’s Desk — IndianVCs' }
 
 export default async function AdminDashboardPage() {
   const stats = await getSiteStats()
 
   const cards = [
-    { label: 'Total Tools',          value: stats.toolCount,        icon: Layers,        color: 'text-purple-400',  bg: 'bg-purple-500/10',  ring: 'ring-purple-500/20' },
-    { label: 'Categories',           value: stats.categoryCount,    icon: FolderOpen,    color: 'text-blue-400',    bg: 'bg-blue-500/10',    ring: 'ring-blue-500/20' },
-    { label: 'Pending Submissions',  value: stats.submissionCount,  icon: ClipboardList, color: 'text-amber-400',   bg: 'bg-amber-500/10',   ring: 'ring-amber-500/20' },
-    { label: 'Approved Reviews',     value: stats.reviewCount,      icon: Star,          color: 'text-emerald-400', bg: 'bg-emerald-500/10', ring: 'ring-emerald-500/20' },
+    { label: 'Tools Indexed', value: stats.toolCount },
+    { label: 'Sections', value: stats.categoryCount },
+    { label: 'Pending Submissions', value: stats.submissionCount },
+    { label: 'Published Reviews', value: stats.reviewCount },
   ]
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Overview of your VCStack directory</p>
-      </div>
+    <div style={{ padding: '32px 40px 64px' }}>
+      <header
+        style={{
+          borderTop: '3px double var(--ink)',
+          borderBottom: '1px solid var(--ink)',
+          padding: '20px 0',
+          marginBottom: 32,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 'var(--fs-tag)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            color: 'var(--red)',
+            marginBottom: 8,
+          }}
+        >
+          Editor’s Desk · Today
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--serif)',
+            fontWeight: 900,
+            fontSize: 'var(--fs-name)',
+            color: 'var(--ink)',
+            lineHeight: 1.1,
+          }}
+        >
+          The Newsroom
+        </h1>
+        <p
+          style={{
+            fontFamily: 'var(--body)',
+            fontSize: '1rem',
+            color: 'var(--ink-light)',
+            marginTop: 10,
+            fontStyle: 'italic',
+          }}
+        >
+          The state of the paper, at a glance.
+        </p>
+      </header>
 
-      {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
-        {cards.map(({ label, value, icon: Icon, color, bg, ring }) => (
-          <div key={label} className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${bg} ring-1 ${ring}`}>
-                <Icon className={`h-4 w-4 ${color}`} />
-              </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          border: '1px solid var(--ink)',
+          marginBottom: 48,
+        }}
+      >
+        {cards.map((card, i) => (
+          <div
+            key={card.label}
+            style={{
+              padding: '24px 20px',
+              borderRight: i < cards.length - 1 ? '1px solid var(--rule)' : 'none',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-tag)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                color: 'var(--ink-muted)',
+                marginBottom: 10,
+              }}
+            >
+              {card.label}
             </div>
-            <p className="text-3xl font-bold text-foreground">{value}</p>
+            <div
+              style={{
+                fontFamily: 'var(--serif)',
+                fontWeight: 900,
+                fontSize: '2.4rem',
+                color: 'var(--ink)',
+                lineHeight: 1,
+              }}
+            >
+              {card.value}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="section-header">Quick Actions</div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          border: '1px solid var(--ink)',
+        }}
+      >
         {[
-          { title: 'Review Submissions', desc: `${stats.submissionCount} pending approval`, href: '/admin/submissions', cta: 'Review now →' },
-          { title: 'Add New Tool',       desc: 'Manually add a tool to the directory',       href: '/admin/tools/new',   cta: 'Add tool →' },
-          { title: 'Add Category',       desc: 'Create a new tool category',                 href: '/admin/categories/new', cta: 'Add category →' },
-        ].map(({ title, desc, href, cta }) => (
-          <a
+          {
+            title: 'Review Submissions',
+            desc: `${stats.submissionCount} pending editor approval`,
+            href: '/admin/submissions',
+          },
+          {
+            title: 'Manage Tools',
+            desc: 'Edit or add tools to the index',
+            href: '/admin/tools',
+          },
+          {
+            title: 'Manage Sections',
+            desc: 'Curate the categories of the paper',
+            href: '/admin/categories',
+          },
+        ].map(({ title, desc, href }, i) => (
+          <Link
             key={href}
             href={href}
-            className="group rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-all"
+            style={{
+              padding: 24,
+              borderRight: i < 2 ? '1px solid var(--rule)' : 'none',
+              textDecoration: 'none',
+              color: 'var(--ink)',
+              display: 'block',
+            }}
           >
-            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors mb-1">
+            <h3
+              style={{
+                fontFamily: 'var(--serif)',
+                fontWeight: 900,
+                fontSize: '1.2rem',
+                marginBottom: 8,
+                color: 'var(--ink)',
+              }}
+            >
               {title}
             </h3>
-            <p className="text-xs text-muted-foreground mb-3">{desc}</p>
-            <p className="text-xs text-primary font-medium">{cta}</p>
-          </a>
+            <p
+              style={{
+                fontFamily: 'var(--body)',
+                fontSize: '0.95rem',
+                color: 'var(--ink-light)',
+                marginBottom: 14,
+                fontStyle: 'italic',
+              }}
+            >
+              {desc}
+            </p>
+            <span
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 'var(--fs-tag)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                color: 'var(--red)',
+              }}
+            >
+              Open →
+            </span>
+          </Link>
         ))}
       </div>
     </div>

@@ -98,19 +98,60 @@ export async function getToolsByCategory(
   return { data, total, page, pageSize, totalPages }
 }
 
+const PINNED_SLUG = 'evertrace'
+
+function pinEverTrace<T extends { slug: string }>(list: T[]): T[] {
+  const idx = list.findIndex((t) => t.slug === PINNED_SLUG)
+  if (idx <= 0) return list
+  const copy = [...list]
+  const [pinned] = copy.splice(idx, 1)
+  copy.unshift(pinned)
+  return copy
+}
+
+function dedupeByWebsite<T extends { websiteUrl: string; name: string }>(list: T[]): T[] {
+  const seen = new Set<string>()
+  const out: T[] = []
+  for (const t of list) {
+    const key = (t.websiteUrl || `name:${t.name}`).replace(/\/+$/, '').toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(t)
+  }
+  return out
+}
+
+export async function getAllTools(): Promise<Tool[]> {
+  const db = await getPrisma()
+  if (db) {
+    try {
+      const rows = await db.tool.findMany({
+        include: { category: true, tags: true, _count: { select: { reviews: true } } },
+        orderBy: [{ isFeatured: 'desc' }, { name: 'asc' }],
+      })
+      return pinEverTrace(dedupeByWebsite(rows))
+    } catch { /* fall through */ }
+  }
+  const sorted = [...STATIC_TOOLS].sort((a, b) =>
+    (Number(b.isFeatured) - Number(a.isFeatured)) || a.name.localeCompare(b.name)
+  )
+  return pinEverTrace(dedupeByWebsite(sorted))
+}
+
 export async function getFeaturedTools(limit = 12): Promise<Tool[]> {
   const db = await getPrisma()
   if (db) {
     try {
-      return await db.tool.findMany({
+      const rows = await db.tool.findMany({
         where: { isFeatured: true },
         include: { category: true, tags: true, _count: { select: { reviews: true } } },
         take: limit,
         orderBy: { updatedAt: 'desc' },
       })
+      return pinEverTrace(rows)
     } catch { /* fall through */ }
   }
-  return STATIC_TOOLS.filter((t) => t.isFeatured).slice(0, limit)
+  return pinEverTrace(STATIC_TOOLS.filter((t) => t.isFeatured)).slice(0, limit)
 }
 
 export async function getToolBySlug(slug: string): Promise<Tool | null> {
@@ -234,60 +275,45 @@ export async function getCategoryPreviewTools(): Promise<Record<string, PreviewT
 }
 
 // ─── Category images — served locally from public/images/categories/ ──────────
-// Only real landscape photos included; small tool logos use gradient fallback.
-// Downloaded by: python3 download_cat_images.py
 const CAT_IMAGES: Record<string, string> = {
-  // ✅ Verified real photos (>30 KB)
-  'captable-equity-management':          '/images/categories/captable-equity-management.jpg',
-  'community':                           '/images/categories/community.jpg',
-  'crm':                                 '/images/categories/crm.jpg',
-  'data':                                '/images/categories/data.jpg',
-  'data-room':                           '/images/categories/data-room.jpg',
-  'fund-admin-software':                 '/images/categories/fund-admin-software.jpg',
-  'infrastructure':                      '/images/categories/infrastructure.jpg',
-  'platform':                            '/images/categories/platform.jpg',
-  // ✅ Smaller but verified photos
-  'calendar':                            '/images/categories/calendar.jpg',
-  'esg':                                 '/images/categories/esg.jpg',
-  'lp-tools':                            '/images/categories/lp-tools.jpg',
-  'newsletter-tools':                    '/images/categories/newsletter-tools.jpg',
-  'research':                            '/images/categories/research.jpg',
-  // ❌ Removed — these downloaded as tool logos, gradient looks better:
-  // deal-sourcing, portfolio-management (both = Edda logo, 18K)
-  // email, fund-modeling, hiring-payroll, insurance, job-board,
-  // liquidity-instruments, news-resources, other-tools,
-  // project-management, video-conferencing, website (all 2–8K logos)
+  'crm':                      '/images/categories/crm.jpg',
+  'data':                     '/images/categories/data.jpg',
+  'research':                 '/images/categories/research.jpg',
+  'news':                     '/images/categories/news-resources.jpg',
+  'portfolio-management':     '/images/categories/portfolio-management.jpg',
+  'captable':                 '/images/categories/captable-equity-management.jpg',
+  'finance':                  '/images/categories/fund-admin-software.jpg',
+  'admin-ops':                '/images/categories/infrastructure.jpg',
+  'communication':            '/images/categories/video-conferencing.jpg',
+  'mailing':                  '/images/categories/email.jpg',
+  'calendar':                 '/images/categories/calendar.jpg',
+  'productivity':             '/images/categories/project-management.jpg',
+  'vibe-coding':              '/images/categories/platform.jpg',
+  'other-tools':              '/images/categories/other-tools.jpg',
 }
 
-// ─── Static fallback data (real vcstack.io categories) ────────────────────────
+// ─── Static fallback data (IndianVCs VC Stack 2026 — 19 sections) ─────────────
 
 export const STATIC_CATEGORIES: Category[] = [
-  { id: 'cat-24', name: 'Calendar',                       slug: 'calendar',                          description: 'Most investors know the feeling of hopping from call to call. These tools can help you manage your calendar and be the boss of your calendar again.',                icon: '📅', imageUrl: CAT_IMAGES['calendar'], _count: { tools: 8 } },
-  { id: 'cat-8',  name: 'Captable / Equity Management',   slug: 'captable-equity-management',        description: 'Software to facilitate the management of the portfolio companies equity & captable.',           icon: '📑', imageUrl: CAT_IMAGES['captable-equity-management'], _count: { tools: 19 } },
-  { id: 'cat-23', name: 'Community',                      slug: 'community',                         description: 'Tools & Software to create community platforms.',                                              icon: '🏘️', imageUrl: CAT_IMAGES['community'], _count: { tools: 7 } },
-  { id: 'cat-2',  name: 'CRM',                            slug: 'crm',                               description: 'Software to record all interactions with (potential) portfolio companies & founders.',          icon: '🤝', imageUrl: CAT_IMAGES['crm'], _count: { tools: 22 } },
-  { id: 'cat-7',  name: 'Data',                           slug: 'data',                              description: 'Tools or websites that help you to get different data points on your startups.',               icon: '📈', imageUrl: CAT_IMAGES['data'], _count: { tools: 80 } },
-  { id: 'cat-6',  name: 'Data Room',                      slug: 'data-room',                         description: 'Tools to create & manage secure Data Rooms.',                                                  icon: '🔒', imageUrl: CAT_IMAGES['data-room'], _count: { tools: 17 } },
-  { id: 'cat-1',  name: 'Deal Sourcing',                  slug: 'deal-sourcing',                     description: 'Websites that help you find deals and facilitate matchmaking.',                                 icon: '🔍', imageUrl: CAT_IMAGES['deal-sourcing'], _count: { tools: 88 } },
-  { id: 'cat-13', name: 'Email',                          slug: 'email',                             description: 'Tools to run the emails in your firm.',                                                         icon: '📧', imageUrl: CAT_IMAGES['email'], _count: { tools: 4 } },
-  { id: 'cat-15', name: 'ESG',                            slug: 'esg',                               description: 'Tools to manage ESG reporting for your investment portfolio.',                                  icon: '🌱', imageUrl: CAT_IMAGES['esg'], _count: { tools: 12 } },
-  { id: 'cat-4',  name: 'Fund Admin & Reporting',         slug: 'fund-admin-software',               description: 'Software that helps manage & report your VC fund.',                                             icon: '🏦', imageUrl: CAT_IMAGES['fund-admin-software'], _count: { tools: 35 } },
-  { id: 'cat-11', name: 'Fund Modeling & Forecasting',    slug: 'fund-modeling-portfolio-forecasting', description: 'Tools that help fund managers model their fund and forecast their portfolio.',                  icon: '📉', imageUrl: CAT_IMAGES['fund-modeling-portfolio-forecasting'], _count: { tools: 11 } },
-  { id: 'cat-16', name: 'Hiring & Payroll',               slug: 'hiring-payroll',                    description: 'Tools & Software you need to find world-class talents and hire a global diverse team.',        icon: '👥', imageUrl: CAT_IMAGES['hiring-payroll'], _count: { tools: 9 } },
-  { id: 'cat-17', name: 'Infrastructure',                 slug: 'infrastructure',                    description: 'Tools & Services to run your Venture Capital fund or Investment SPV.',                         icon: '⚙️', imageUrl: CAT_IMAGES['infrastructure'], _count: { tools: 18 } },
-  { id: 'cat-18', name: 'Insurance',                      slug: 'insurance',                         description: 'Companies that provide insurance solutions for Investors and GPs.',                             icon: '🛡️', imageUrl: CAT_IMAGES['insurance'], _count: { tools: 2 } },
-  { id: 'cat-19', name: 'Job Board & Talent Pool',        slug: 'job-board-talent-pool',             description: 'Tools or websites that help you to set up a job board or talent pool for portfolio companies.', icon: '💼', imageUrl: CAT_IMAGES['job-board-talent-pool'], _count: { tools: 6 } },
-  { id: 'cat-20', name: 'Liquidity Instruments',          slug: 'liquidity-instruments',             description: 'Instruments that help with the liquidity of your assets.',                                     icon: '💧', imageUrl: CAT_IMAGES['liquidity-instruments'], _count: { tools: 17 } },
-  { id: 'cat-5',  name: 'LP Tools',                       slug: 'lp-tools',                          description: 'Software that helps Limited Partners with research, benchmarking and more.',                   icon: '📋', imageUrl: CAT_IMAGES['lp-tools'], _count: { tools: 19 } },
-  { id: 'cat-21', name: 'Newsletter Tools',               slug: 'newsletter-tools',                  description: 'Providers that let you send out newsletter emails to your network.',                           icon: '📰', imageUrl: CAT_IMAGES['newsletter-tools'], _count: { tools: 4 } },
-  { id: 'cat-22', name: 'News & Resources',               slug: 'news-resources',                    description: 'Websites, newsletters to stay up to date on the latest tech news.',                           icon: '📡', imageUrl: CAT_IMAGES['news-resources'], _count: { tools: 15 } },
-  { id: 'cat-25', name: 'Other Tools',                    slug: 'other-tools',                       description: 'Other tools that can be helpful for running your VC firm.',                                    icon: '🔧', imageUrl: CAT_IMAGES['other-tools'], _count: { tools: 18 } },
-  { id: 'cat-14', name: 'Platform',                       slug: 'platform',                          description: 'Tools that help to setup VC platform features like vendor operations or deals.',               icon: '🏗️', imageUrl: CAT_IMAGES['platform'], _count: { tools: 11 } },
-  { id: 'cat-3',  name: 'Portfolio Management',           slug: 'portfolio-management',              description: 'Software to manage and monitor your investment portfolio.',                                     icon: '📊', imageUrl: CAT_IMAGES['portfolio-management'], _count: { tools: 25 } },
-  { id: 'cat-12', name: 'Project Management',             slug: 'project-management',                description: 'Software that helps manage tasks & goals inside the VC firm.',                                 icon: '📌', imageUrl: CAT_IMAGES['project-management'], _count: { tools: 6 } },
-  { id: 'cat-9',  name: 'Research',                       slug: 'research',                          description: 'Companies & Websites that help with market research.',                                          icon: '🔬', imageUrl: CAT_IMAGES['research'], _count: { tools: 46 } },
-  { id: 'cat-10', name: 'Video Conferencing',             slug: 'video-conferencing',                description: 'Tools to run your virtual meetings.',                                                           icon: '💬', imageUrl: CAT_IMAGES['video-conferencing'], _count: { tools: 6 } },
-  { id: 'cat-26', name: 'Website',                        slug: 'website',                           description: 'Tools to run your own website as a VC firm.',                                                  icon: '🌐', imageUrl: CAT_IMAGES['website'], _count: { tools: 4 } },
+  { id: 'cat-1',  name: 'CRM',                 slug: 'crm',                 description: 'Relationship ledgers for private capital. Track every conversation, intro, and follow-up across the firm’s deal flow.',                                       icon: '🤝', imageUrl: CAT_IMAGES['crm'] ?? null,                 _count: { tools: 12 } },
+  { id: 'cat-2',  name: 'Data',                slug: 'data',                description: 'Market databases, company graphs, and private-market intelligence. The raw material behind every investment memo.',                                         icon: '📈', imageUrl: CAT_IMAGES['data'] ?? null,                _count: { tools: 13 } },
+  { id: 'cat-3',  name: 'Research',            slug: 'research',            description: 'Primary and secondary research workbenches. Expert calls, sector scans, and the long read behind a short decision.',                                     icon: '🔬', imageUrl: CAT_IMAGES['research'] ?? null,            _count: { tools: 15 } },
+  { id: 'cat-4',  name: 'News',                slug: 'news',                description: 'The daily broadsheet of venture. Feeds, aggregators, and newsletters investors read before the first coffee.',                                         icon: '📰', imageUrl: CAT_IMAGES['news'] ?? null,                _count: { tools: 14 } },
+  { id: 'cat-5',  name: 'AI',                  slug: 'ai',                  description: 'General-purpose copilots and assistants. The cognitive layer sitting under every other workflow on this page.',                                         icon: '✨', imageUrl: null,                                     _count: { tools: 7 } },
+  { id: 'cat-6',  name: 'Portfolio Management', slug: 'portfolio-management', description: 'Where a fund watches what it already owns. Metrics, KPIs, and quarterly letters for the companies on the cap table.',                              icon: '📊', imageUrl: CAT_IMAGES['portfolio-management'] ?? null, _count: { tools: 3 } },
+  { id: 'cat-7',  name: 'Captable',            slug: 'captable',            description: 'Equity ledgers and ownership records. Issue shares, model dilution, and keep the 409A tidy.',                                                         icon: '📑', imageUrl: CAT_IMAGES['captable'] ?? null,            _count: { tools: 3 } },
+  { id: 'cat-8',  name: 'Finance',             slug: 'finance',             description: 'Fund banking, treasury, and accounting. The plumbing that moves capital calls, distributions, and payroll.',                                        icon: '🏦', imageUrl: CAT_IMAGES['finance'] ?? null,             _count: { tools: 3 } },
+  { id: 'cat-9',  name: 'Admin & Ops',         slug: 'admin-ops',           description: 'Fund administration, compliance, and the operational scaffolding behind running a venture firm.',                                                 icon: '⚙️', imageUrl: CAT_IMAGES['admin-ops'] ?? null,           _count: { tools: 4 } },
+  { id: 'cat-10', name: 'Automation',          slug: 'automation',          description: 'Workflow glue. No-code engines that wire your CRM, inbox, and data room together without a developer.',                                          icon: '🔁', imageUrl: null,                                     _count: { tools: 4 } },
+  { id: 'cat-11', name: 'Communication',       slug: 'communication',       description: 'Where the partnership talks to itself and the outside world. Chat, video, and the rooms where diligence happens.',                              icon: '💬', imageUrl: CAT_IMAGES['communication'] ?? null,       _count: { tools: 4 } },
+  { id: 'cat-12', name: 'Mailing',             slug: 'mailing',             description: 'Inbox infrastructure. From founder LPs mail to quarterly newsletters, this is where correspondence is sent and filed.',                          icon: '📧', imageUrl: CAT_IMAGES['mailing'] ?? null,             _count: { tools: 4 } },
+  { id: 'cat-13', name: 'Calendar',            slug: 'calendar',            description: 'Booking, blocking, and defending time. Tools that decide when the partnership meets and when the founder gets ten minutes.',                     icon: '📅', imageUrl: CAT_IMAGES['calendar'] ?? null,            _count: { tools: 4 } },
+  { id: 'cat-14', name: 'Transcription',       slug: 'transcription',       description: 'Meeting recorders and note-takers. Every call, pitch, and partner meeting turned into searchable text.',                                          icon: '📝', imageUrl: null,                                     _count: { tools: 6 } },
+  { id: 'cat-15', name: 'Voice to Text',       slug: 'voice-to-text',       description: 'Dictation for the investor on the move. Turn voice memos between meetings into memos in the CRM.',                                              icon: '🎙️', imageUrl: null,                                     _count: { tools: 4 } },
+  { id: 'cat-16', name: 'Productivity',        slug: 'productivity',        description: 'Docs, wikis, and task boards. The second brain where theses, diligence, and portfolio notes all live.',                                         icon: '🗂️', imageUrl: CAT_IMAGES['productivity'] ?? null,        _count: { tools: 4 } },
+  { id: 'cat-17', name: 'Vibe Coding',         slug: 'vibe-coding',         description: 'AI-native builders for non-engineers. Prototype a landing page, a dashboard, or a diligence tool before lunch.',                                  icon: '🛠️', imageUrl: CAT_IMAGES['vibe-coding'] ?? null,         _count: { tools: 5 } },
+  { id: 'cat-18', name: 'Browser',             slug: 'browser',             description: 'The window to the work. Investor-grade browsers with tabs, workspaces, and AI built into the address bar.',                                      icon: '🌐', imageUrl: null,                                     _count: { tools: 6 } },
+  { id: 'cat-19', name: 'Other Tools',         slug: 'other-tools',         description: 'Everything else on the investor’s desktop. Design files, storage, shortcuts, and the utilities that refuse a tidier shelf.',                icon: '🔧', imageUrl: CAT_IMAGES['other-tools'] ?? null,         _count: { tools: 23 } },
 ]
 
 function catById(id: string): Category {

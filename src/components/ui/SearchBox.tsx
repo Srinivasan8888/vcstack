@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search } from 'lucide-react'
 
 interface SearchBoxProps {
   defaultValue?: string
@@ -28,18 +27,18 @@ export default function SearchBox({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`relative mx-auto w-full max-w-xl ${className}`}
+      className={className}
+      style={{ display: 'flex', gap: 8, maxWidth: 560, margin: '0 auto' }}
     >
-      <div className="relative flex items-center">
-        <Search className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          className="h-13 w-full rounded-full border border-white/80 bg-white/90 backdrop-blur-sm pl-11 pr-5 text-sm text-foreground placeholder:text-gray-400 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200/50 transition-all shadow-md"
-        />
-      </div>
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={placeholder}
+        className="input"
+        style={{ flex: 1 }}
+      />
+      <button type="submit" className="btn btn--primary">Search</button>
     </form>
   )
 }
