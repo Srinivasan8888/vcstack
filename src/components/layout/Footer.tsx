@@ -7,7 +7,7 @@ const COLS: Record<string, FooterLink[]> = {
     { label: 'Home',           href: '/' },
     { label: 'All Categories', href: '/all-categories' },
     { label: 'Market Map',     href: '/market-map' },
-    { label: 'Blog',           href: 'https://hub.indianvcs.com/', external: true },
+    { label: 'VC HUB',           href: 'https://hub.indianvcs.com/', external: true },
     { label: 'Newsletter',     href: '/newsletter' },
   ],
   Masthead: [
